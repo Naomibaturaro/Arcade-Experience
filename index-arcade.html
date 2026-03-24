@@ -90,28 +90,33 @@
     </div>
 
     <div class="chat-btn" onclick="toggleChat()">
-    <img src="img/robot.png" alt="Asistente Robot" class="chat-robot-img">
-</div>
+        <img src="img/robot.png" alt="Asistente Robot" class="chat-robot-img">
+    </div>
+
     <div id="chat-container">
-        <div style="background:#111; padding:10px; display:flex; justify-content:space-between; border-bottom:1px solid #0ff;">
-            <span style="font-size:0.7rem; color:#0ff;">SISTEMA DE ASISTENCIA</span>
-            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer;">[X]</button>
+        <div style="background:#111; padding:12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #0ff;">
+            <span style="font-size:0.7rem; color:#0ff; font-weight:bold;">SISTEMA DE ASISTENCIA</span>
+            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-size:1rem;">[X]</button>
         </div>
-        <div id="chat-messages" style="flex-grow:1; padding:10px; overflow-y:auto; font-size:0.8rem;">
-            <div style="background:#222; padding:8px; border-radius:5px; border-left:3px solid #0ff; margin-bottom:10px;">
-                Hola. Soy el asistente de Arcade Experience. Elige una opción.
+        <div id="chat-messages" style="flex-grow:1; padding:15px; overflow-y:auto; font-size:0.8rem; display:flex; flex-direction:column; gap:10px;">
+            <div style="background:#222; padding:10px; border-radius:10px 10px 10px 0; border-left:3px solid #0ff;">
+                Hola. Soy el asistente de Arcade Experience. ¿En qué módulo puedo ayudarte?
             </div>
-            <div class="user-option" style="border:1px solid #0ff; padding:5px; margin-top:5px; cursor:pointer; text-align:center;" onclick="openRandomGame()">Juego al azar</div>
+            
+            <div class="user-option" onclick="openRandomGame()">🎮 JUEGO AL AZAR</div>
+            <div class="user-option" onclick="chatLogic('juegos')">🔍 SUGERIRME UN JUEGO</div>
+            <div class="user-option" onclick="chatLogic('error')">⚠️ REPORTAR ANOMALÍA</div>
         </div>
     </div>
-<div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-    <div class="robot-3d-container">
-        <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
+
+    <div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <div class="robot-3d-container">
+            <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
+        </div>
+        <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
+        <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
+        <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
     </div>
-    <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
-    <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
-    <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
-</div>
 
     <script src="script-arcade.js"></script>
 </body>
