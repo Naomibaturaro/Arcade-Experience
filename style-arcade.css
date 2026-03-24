@@ -65,12 +65,6 @@ nav h1 { font-size: 1.5rem; letter-spacing: 4px; color: #0ff; text-shadow: 0 0 1
 nav div a { color: #fff; margin-left: 30px; text-decoration: none; font-size: 0.8rem; transition: 0.3s; }
 nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
 
-@media (max-width: 600px) {
-    nav { padding: 15px 20px; flex-direction: column; gap: 10px; }
-    nav h1 { font-size: 1rem; }
-    nav div a { margin-left: 10px; font-size: 0.6rem; }
-}
-
 /* --- HERO --- */
 .hero {
     height: 40vh; display: flex; flex-direction: column;
@@ -116,41 +110,20 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
 }
 .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff00ff; background: #ff33ff; }
 
-/* Variación cian para el botón del cartel de éxito */
-#success-overlay .btn-neon {
-    background: transparent;
-    border: 2px solid #0ff;
-    color: #0ff;
-    box-shadow: 0 0 10px #0ff;
-}
-#success-overlay .btn-neon:hover {
-    background: #0ff;
-    color: #000;
-    box-shadow: 0 0 20px #0ff;
-}
-
-/* --- BOTÓN DEL CHAT (CON IMAGEN) --- */
+/* --- BOTÓN DEL CHAT (ROBOT FLOTANTE) --- */
 .chat-btn { 
     position: fixed; 
     bottom: 20px; 
     right: 20px; 
-    /* Quitamos el 'background: #0ff' para que el robot flote sobre el fondo negro */
-    width: 65px; /* Un poquito más grande */
+    width: 65px; 
     height: 65px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     cursor: pointer; 
-    /* Mantenemos la sombra cian para que parezca que el robot "brilla" */
     filter: drop-shadow(0 0 10px #0ff); 
-    z-index: 99999; /* Prioridad máxima */
+    z-index: 999999; 
     transition: transform 0.3s ease;
-    
-    /* Si quieres que el robot esté dentro de un círculo cian, 
-       descomenta las siguientes 3 líneas: */
-    /* background: rgba(0, 255, 255, 0.2); */
-    /* border: 2px solid #0ff; */
-    /* border-radius: 50%; */
 }
 
 .chat-btn:hover { 
@@ -158,22 +131,72 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     filter: drop-shadow(0 0 20px #0ff);
 }
 
-/* --- ESTILO ESPECÍFICO PARA LA IMAGEN DENTRO DEL BOTÓN --- */
 .chat-robot-img {
-    width: 100%; /* Ocupa todo el ancho del contenedor .chat-btn */
-    height: auto; /* Mantiene la proporción */
+    width: 100%;
+    height: auto;
     display: block;
-    /* Si tu robot.png tiene bordes blancos, puedes usar esto para quitarlos: */
-    /* mix-blend-mode: screen; */ 
-}
-/* BLOQUEO DE ACCESO */
-#denied-overlay {
-    position: fixed; inset: 0; background: #000; z-index: 20000;
-    display: none; flex-direction: column; justify-content: center; align-items: center;
-    text-align: center; padding: 20px;
 }
 
-/* --- ESTILO DEL FORMULARIO DE REPORTE --- */
+/* --- CONTENEDOR DEL CHAT (ESTILO VENTANA FLOTANTE / TINA) --- */
+#chat-container {
+    position: fixed;
+    bottom: 95px; /* Por encima del botón del robot */
+    right: 20px;
+    width: 320px;
+    height: 450px;
+    background: rgba(5, 5, 5, 0.9);
+    border: 2px solid #0ff;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    display: none; /* Controlado por JS */
+    flex-direction: column;
+    z-index: 999998;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/* Clase activa para animaciones */
+#chat-container.active {
+    display: flex;
+    animation: chatSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes chatSlideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Opciones interactivas dentro del chat */
+.user-option {
+    border: 1px solid #0ff;
+    padding: 10px;
+    margin-top: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.3s;
+    font-size: 0.75rem;
+    background: rgba(0, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+.user-option:hover {
+    background: #0ff;
+    color: #000;
+    box-shadow: 0 0 10px #0ff;
+}
+
+/* Estilo para los mensajes del bot */
+.bot-msg {
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 10px 10px 10px 0;
+    border-left: 3px solid #0ff;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+/* --- FORMULARIO Y OTROS --- */
 .contact form {
     display: flex;
     flex-direction: column;
@@ -182,8 +205,7 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     margin: 20px auto;
 }
 
-.contact input, 
-.contact textarea {
+.contact input, .contact textarea {
     background: #111;
     border: 1px solid #0ff;
     color: #fff;
@@ -195,47 +217,34 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     transition: 0.3s;
 }
 
-.contact input:focus, 
-.contact textarea:focus {
+.contact input:focus, .contact textarea:focus {
     box-shadow: 0 0 10px #0ff;
     border-color: #fff;
-    background: #1a1a1a;
 }
 
-.contact input::placeholder, 
-.contact textarea::placeholder {
-    color: rgba(0, 255, 255, 0.5);
-    font-size: 0.8rem;
-}
-
-/* --- CARTEL DE ÉXITO (SUCCESS OVERLAY) --- */
 #success-overlay {
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0, 0, 0, 0.95); 
-    z-index: 30000; 
-    display: none; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center; 
-    text-align: center;
-    backdrop-filter: blur(5px);
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 30000; 
+    display: none; flex-direction: column; justify-content: center; align-items: center; 
+    text-align: center; backdrop-filter: blur(5px);
 }
 
-#success-overlay h1 {
-    text-shadow: 0 0 15px #0ff;
-    letter-spacing: 5px;
-}
-
-#success-overlay p {
-    font-family: monospace;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+#denied-overlay {
+    position: fixed; inset: 0; background: #000; z-index: 20000;
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 20px;
 }
 
 /* RESPONSIVO PARA MÓVILES */
 @media (max-width: 600px) {
-    .contact h2 { font-size: 1.5rem; }
-    .contact form { width: 95%; }
+    nav { padding: 15px 20px; flex-direction: column; gap: 10px; }
+    nav h1 { font-size: 1rem; }
+    nav div a { margin-left: 10px; font-size: 0.6rem; }
     .hero h2 { font-size: 1.8rem; }
+    
+    #chat-container {
+        width: 90%;
+        right: 5%;
+        bottom: 85px;
+        height: 60vh;
+    }
 }
