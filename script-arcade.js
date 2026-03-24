@@ -82,6 +82,24 @@ function chatLogic(op) {
     msgs.scrollTop = msgs.scrollHeight;
 }
 
+let touchX = null;
+let touchY = null;
+
+document.addEventListener("touchstart", (e) => {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener("touchmove", (e) => {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener("touchend", () => {
+    touchX = null;
+    touchY = null;
+});
+
 // 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
 function openWindow(game) {
     stopGame(); 
@@ -109,6 +127,8 @@ function stopGame() {
     if (animationId) cancelAnimationFrame(animationId); 
     if (window.gameInterval) clearInterval(window.gameInterval);
     document.onkeydown = null; 
+    touchX = null;
+    touchY = null;
 }
 
 function initGame() {
@@ -156,15 +176,23 @@ function getInputX(e, canvas) {
 function startSnake() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
     let snake = [{x: 200, y: 140}, {x: 180, y: 140}], food = {x: 100, y: 100}, dx = 20, dy = 0, lastUpdate = 0;
-    document.onkeydown = (e) => {
-        if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
-        if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
-        if (e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
-        if (e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
-    };
+    function handleSnakeTouch() {
+    if (touchX === null) return;
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    if (touchY < h * 0.3 && dy === 0) { dx = 0; dy = -20; } // arriba
+    else if (touchY > h * 0.7 && dy === 0) { dx = 0; dy = 20; } // abajo
+    else if (touchX < w * 0.5 && dx === 0) { dx = -20; dy = 0; } // izquierda
+    else if (touchX >= w * 0.5 && dx === 0) { dx = 20; dy = 0; } // derecha
+}
+ 
+
     function loop(time) {
         if (!gameActive) return;
         animationId = requestAnimationFrame(loop);
+        handleSnakeTouch();
         if (time - lastUpdate < 85) return;
         lastUpdate = time;
         const head = {x: snake[0].x + dx, y: snake[0].y + dy};
@@ -186,10 +214,19 @@ function startBouncing() {
         bricks[c] = [];
         for(let r=0; r<rows; r++) bricks[c][r] = { status: Math.random() > 0.8 ? 2 : 1, color: `hsl(${Math.random() * 360}, 70%, 60%)` };
     }
-    canvas.onmousemove = canvas.ontouchmove = (e) => { if(e.touches) e.preventDefault(); px = getInputX(e, canvas) - 40; };
-    function createExplosion(x, y, color) { for(let i=0; i<8; i++) particles.push({x: x, y: y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, life: 1, c: color}); }
+    function handleBouncingTouch() {
+    if (touchX === null) return;
+
+    const w = window.innerWidth;
+    px = (touchX / w) * 400 - 40;
+
+    // límites
+    if (px < 0) px = 0;
+    if (px > 320) px = 320;
+}
     function loop() {
         if (!gameActive) return;
+        handleBouncingTouch();
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)"; ctx.fillRect(0, 0, 400, 300);
         particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.07; ctx.fillStyle = p.c; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, 2, 2); if(p.life <= 0) particles.splice(i, 1); });
         ctx.globalAlpha = 1;
@@ -207,7 +244,14 @@ function startBouncing() {
         }
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = "#0ff"; ctx.fillRect(px, 280, 80, 10);
-        bx += bdx; by += bdy;
+       bx += bdx;
+
+// MÁS LENTO CUANDO BAJA
+if (bdy > 0) {
+    by += bdy * 0.75; // bajada más lenta
+} else {
+    by += bdy; // subida normal
+}
         if(bx <= 0 || bx >= 400) { bdx *= -1; createExplosion(bx, by, "#fff"); }
         if(by <= 0) bdy *= -1;
         if(by > 275 && bx > px && bx < px+80) { bdx = ((bx - (px + 40)) / 40) * 8; bdy = -Math.abs(bdy) * 1.02; createExplosion(bx, 280, "#0ff"); }
@@ -222,7 +266,12 @@ function startDodge() {
     let px = 180, obs = [], keys = {}, speedMultiplier = 1;
     document.onkeydown = (e) => keys[e.key] = true;
     document.onkeyup = (e) => keys[e.key] = false;
-    canvas.onmousemove = canvas.ontouchmove = (e) => px = getInputX(e, canvas) - 10;
+    function handleDodgeTouch() {
+    if (touchX === null) return;
+
+    const w = window.innerWidth;
+    px = (touchX / w) * 400 - 10;
+}
     window.gameInterval = setInterval(() => {
         if(!gameActive) return;
         let type = Math.random() > 0.8 ? 'GLITCH' : 'DATA'; 
@@ -230,6 +279,7 @@ function startDodge() {
     }, 450);
     function loop() {
         if (!gameActive) return;
+        handleDodgeTouch();
         if (keys["ArrowLeft"]) px -= 7; if (keys["ArrowRight"]) px += 7;
         if (px < 0) px = 0; if (px > 380) px = 380;
         ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.fillRect(0, 0, 400, 300);
@@ -252,9 +302,17 @@ function startJump() {
     for(let i=0; i<6; i++) plats.push({x: Math.random()*340, y: i*55});
     document.onkeydown = (e) => keys[e.key] = true;
     document.onkeyup = (e) => keys[e.key] = false;
-    canvas.onmousemove = canvas.ontouchmove = (e) => jx = getInputX(e, canvas) - 10;
+    function handleJumpTouch() {
+    if (touchX === null) return;
+
+    const w = window.innerWidth;
+
+    if (touchX < w / 2) jSpeed -= 1.2;
+    else jSpeed += 1.2;
+}
     function loop() {
         if (!gameActive) return;
+        handleJumpTouch();
         if (keys["ArrowLeft"]) jSpeed -= 0.8; if (keys["ArrowRight"]) jSpeed += 0.8;
         jSpeed *= 0.9; jx += jSpeed;
         if (jx < -20) jx = 400; if (jx > 400) jx = -20;
