@@ -8,6 +8,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style-arcade.css">
+
+    <style>
+        /* Ajustes críticos para jugabilidad en móvil */
+        canvas {
+            touch-action: none; /* Evita que la página se mueva al tocar el juego */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+        .window-content {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* Asegura que el contenedor de la ventana no sea más grande que la pantalla */
+        #gameWindow {
+            width: 95vw;
+            max-width: 420px;
+        }
+    </style>
 </head>
 <body>
 
