@@ -1,8 +1,9 @@
-﻿// 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
+// 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
 window.onload = () => {
     // Si no hay sesión, bloqueamos todo
     if (!sessionStorage.getItem('sessionActive')) {
-        document.getElementById('denied-overlay').style.display = 'flex';
+        const denied = document.getElementById('denied-overlay');
+        if(denied) denied.style.display = 'flex';
         return;
     }
 
@@ -28,7 +29,15 @@ let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 function toggleChat() {
     const chat = document.getElementById('chat-container');
     if (chat) {
-        chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        // Usamos la clase 'active' para disparar la animación de CSS
+        if (chat.classList.contains('active')) {
+            chat.classList.remove('active');
+            setTimeout(() => { chat.style.display = 'none'; }, 300);
+        } else {
+            chat.style.display = 'flex';
+            // Pequeño delay para que el navegador registre el display:flex antes de la animación
+            setTimeout(() => { chat.classList.add('active'); }, 10);
+        }
     }
 }
 
@@ -38,11 +47,14 @@ function openRandomGame() {
     const msgs = document.getElementById('chat-messages');
     
     if(msgs) {
-        msgs.innerHTML += `<div class="bot-msg" style="background:#111; padding:8px; border-radius:5px; border-left:3px solid #f0f; margin-top:5px;">🤖: ¡Buena elección! Iniciando ${randomGame.toUpperCase()}...</div>`;
+        msgs.innerHTML += `<div class="bot-msg">🤖: ¡Buena elección! Iniciando ${randomGame.toUpperCase()}...</div>`;
         msgs.scrollTop = msgs.scrollHeight;
     }
     
-    setTimeout(() => { openWindow(randomGame); }, 600);
+    setTimeout(() => { 
+        if(document.getElementById('chat-container').classList.contains('active')) toggleChat();
+        openWindow(randomGame); 
+    }, 800);
 }
 
 function chatLogic(op) {
@@ -59,13 +71,14 @@ function chatLogic(op) {
         resp = sugerencias[Math.floor(Math.random() * sugerencias.length)];
     } 
     else if (op === 'error') {
-        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página.";
+        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página para que pueda procesarlo.";
         setTimeout(() => {
+            toggleChat();
             document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
         }, 1500);
     }
 
-    msgs.innerHTML += `<div class="bot-msg" style="background:#222; padding:8px; border-radius:5px; border-left:3px solid #0ff; margin-top:5px;">🤖: ${resp}</div>`;
+    msgs.innerHTML += `<div class="bot-msg">🤖: ${resp}</div>`;
     msgs.scrollTop = msgs.scrollHeight;
 }
 
@@ -261,12 +274,12 @@ function startJump() {
     }
     animationId = requestAnimationFrame(loop);
 }
-// INTERCEPTOR DE FORMULARIO PARA EVITAR EL MENSAJE JSON
-const reportForm = document.querySelector('#contact form');
 
+// INTERCEPTOR DE FORMULARIO
+const reportForm = document.querySelector('#contact form');
 if (reportForm) {
     reportForm.onsubmit = async (e) => {
-        e.preventDefault(); // Evita que la página navegue al JSON
+        e.preventDefault(); 
         
         const btn = reportForm.querySelector('button');
         const originalText = btn.innerText;
@@ -283,7 +296,6 @@ if (reportForm) {
             });
 
             if (response.ok) {
-                // Si FormSubmit responde OK, mostramos el robot
                 document.getElementById('success-overlay').style.display = 'flex';
                 reportForm.reset(); 
             } else {
