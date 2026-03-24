@@ -249,3 +249,47 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
         height: 60vh;
     }
 }
+/* --- AJUSTES DE INTERFAZ DE JUEGO (NUEVO) --- */
+
+.canvas-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Tamaño del canvas */
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+/* El overlay que aparece DENTRO de la ventana de juego cuando pierdes */
+#overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none; /* Se activa con JS */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    text-align: center;
+    border: 1px solid #ff00ff;
+}
+
+#overlay h2 {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+    margin-bottom: 10px;
+}
+
+/* Ajuste de scroll para el chat */
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #0ff #111;
+}
+
+/* Evitar que el canvas se vea borroso en algunos navegadores */
+#gameCanvas {
+    image-rendering: pixelated;
+    background-color: #000;
+}
