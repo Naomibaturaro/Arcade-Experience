@@ -261,3 +261,40 @@ function startJump() {
     }
     animationId = requestAnimationFrame(loop);
 }
+// INTERCEPTOR DE FORMULARIO PARA EVITAR EL MENSAJE JSON
+const reportForm = document.querySelector('#contact form');
+
+if (reportForm) {
+    reportForm.onsubmit = async (e) => {
+        e.preventDefault(); // Evita que la página navegue al JSON
+        
+        const btn = reportForm.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "ENVIANDO DATA...";
+        btn.disabled = true;
+
+        const formData = new FormData(reportForm);
+
+        try {
+            const response = await fetch(reportForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                // Si FormSubmit responde OK, mostramos el robot
+                document.getElementById('success-overlay').style.display = 'flex';
+                reportForm.reset(); 
+            } else {
+                alert("ERROR DE SINCRONIZACIÓN: Intenta de nuevo.");
+            }
+        } catch (error) {
+            console.error("Error de red:", error);
+            alert("SISTEMA OFFLINE: Revisa tu conexión.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    };
+}
