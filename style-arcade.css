@@ -99,6 +99,7 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     background: #000; border: 2px solid #ff00ff;
     width: 100%; height: auto; display: block;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+    touch-action: none;
 }
 
 /* --- BOTONES NEÓN --- */
