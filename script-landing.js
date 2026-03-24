@@ -1,4 +1,4 @@
-﻿// ===== LOADER =====
+// ===== LOADER =====
 window.onload = () => {
     // Le damos un segundo extra para que la animación 3D del robot se luzca
     setTimeout(() => {
@@ -83,4 +83,39 @@ function hideRobot() {
     if (pendingAction === 'arcade') {
         window.location.href = 'index-arcade.html';
     }
+}
+// CONTROL DE ENVÍO DE FORMULARIO SIN RECARGAR
+const contactForm = document.querySelector('#contact form');
+if (contactForm) {
+    contactForm.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const btn = contactForm.querySelector('button');
+        const originalText = btn.innerText;
+        btn.innerText = "ENVIANDO...";
+        btn.disabled = true;
+
+        const formData = new FormData(contactForm);
+
+        try {
+            const response = await fetch(contactForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                // AQUÍ SE ACTIVA EL CARTELITO QUE ESTILIZAMOS ARRIBA
+                document.getElementById('success-overlay').style.display = 'flex';
+                contactForm.reset(); 
+            } else {
+                alert("ERROR EN LA RED: Intenta de nuevo.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    };
 }
