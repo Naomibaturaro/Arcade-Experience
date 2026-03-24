@@ -1,59 +1,15 @@
 /* --- ESTILOS GLOBALES Y RESET --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body {
-    overflow-x: hidden; 
-    height: auto;
-    min-height: 100%;
-    width: 100%;
-    overscroll-behavior-y: contain;
-}
-
 body {
     font-family: 'Orbitron', sans-serif;
     background: #050505;
     color: #fff;
+    overflow-x: hidden;
     scroll-behavior: smooth;
 }
 
-/* 🔴 OVERLAY ACCESO DENEGADO (NUEVO) */
-#denied-overlay{
-    position: fixed;
-    inset: 0;
-    background: #000;
-    z-index: 999999;
-
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-    padding: 20px;
-}
-
-#denied-overlay h1{
-    color: red;
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-#denied-overlay p{
-    color: #0ff;
-    margin-bottom: 20px;
-}
-
-#denied-overlay button{
-    background: #ff00ff;
-    border: none;
-    padding: 12px 25px;
-    color: #fff;
-    cursor: pointer;
-    font-family: 'Orbitron';
-    box-shadow: 0 0 15px #ff00ff;
-}
-
-/* LOADER */
+/* LOADER CON ROBOT 3D */
 #loader { 
     position: fixed; inset: 0; background: #000; 
     display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; 
@@ -84,7 +40,7 @@ body {
 .loader-text { color: #0ff; font-size: 1rem; animation: pulse 1s infinite; letter-spacing: 2px; }
 @keyframes pulse { 0%, 100% { opacity: 0.3 } 50% { opacity: 1 } }
 
-/* FONDO NEON */
+/* FONDO ANIMADO NEÓN */
 body::before {
     content: "";
     position: fixed;
@@ -98,101 +54,197 @@ body::before {
 }
 @keyframes bgMove { from { transform: translate(0, 0) } to { transform: translate(-5%, -5%) } }
 
-/* NAV */
+/* --- NAVEGACIÓN --- */
 nav {
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px 40px; background: #000;
     border-bottom: 2px solid #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     position: sticky; top: 0; z-index: 1000;
 }
-
 nav h1 { font-size: 1.5rem; letter-spacing: 4px; color: #0ff; text-shadow: 0 0 10px #0ff; }
-
-nav div a {
-    color: #fff; margin-left: 30px; text-decoration: none;
-    font-size: 0.8rem; transition: 0.3s;
-}
+nav div a { color: #fff; margin-left: 30px; text-decoration: none; font-size: 0.8rem; transition: 0.3s; }
 nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
 
-/* HERO */
+/* --- HERO --- */
 .hero {
-    height: 40vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    height: 40vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
 }
-.hero h2 { font-size: 3rem; color: #0ff; }
+.hero h2 { font-size: 3rem; color: #0ff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
 
-/* JUEGOS */
+/* --- GRID DE JUEGOS --- */
 .games {
-    padding: 40px 20px;
-    display: grid;
+    padding: 40px 20px; display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
+    gap: 25px; max-width: 1200px; margin: 0 auto;
 }
+.card { background: rgba(17, 17, 17, 0.9); padding: 30px; border: 1px solid #0ff; transition: 0.4s; cursor: pointer; text-align: center; border-radius: 10px; }
+.card:hover { transform: translateY(-10px); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); border-color: #ff00ff; }
+.card h3 { color: #0ff; margin-bottom: 10px; font-size: 1.2rem; }
 
-.card {
-    background: rgba(17, 17, 17, 0.9);
-    padding: 30px;
-    border: 1px solid #0ff;
-    transition: 0.4s;
-    cursor: pointer;
-    border-radius: 10px;
-}
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
-}
-
-/* VENTANA JUEGO */
+/* --- VENTANAS DE JUEGO --- */
 .window {
-    position: fixed;
-    top: 50%; left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    width: 95%; max-width: 450px;
-    background: #000;
-    border: 3px solid #0ff;
-    transition: 0.4s;
-    z-index: 10000;
+    width: 95%; max-width: 500px;
+    background: #000; border: 3px solid #0ff;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10000; display: flex; flex-direction: column;
+    padding: 10px; border-radius: 15px;
 }
 .window.active { transform: translate(-50%, -50%) scale(1); }
+.window-header { padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #0ff; }
 
-/* CANVAS */
 #gameCanvas {
-    background: #000;
-    width: 100%;
-    touch-action: none;
+    background: #000; border: 2px solid #ff00ff;
+    width: 100%; height: auto; display: block;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
 }
 
-/* BOTONES */
-.btn-neon {
-    background: #ff00ff;
-    color: #fff;
-    border: none;
-    padding: 12px 30px;
-    font-family: 'Orbitron';
-    cursor: pointer;
-    box-shadow: 0 0 15px #ff00ff;
+/* --- BOTONES NEÓN --- */
+.btn-neon { 
+    background: #ff00ff; color: #fff; border: none; padding: 12px 30px; 
+    font-family: 'Orbitron'; cursor: pointer; box-shadow: 0 0 15px #ff00ff; 
+    transition: 0.3s; text-transform: uppercase; font-weight: bold; border-radius: 5px;
+    letter-spacing: 2px;
 }
+.btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff00ff; background: #ff33ff; }
 
-/* CHAT */
+/* --- BOTÓN DEL CHAT (ROBOT FLOTANTE) --- */
 .chat-btn { 
-    position: fixed; bottom: 20px; right: 20px;
-    width: 70px; height: 70px;
-    display: flex; justify-content: center; align-items: center;
-    z-index: 999999;
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    width: 65px; 
+    height: 65px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    filter: drop-shadow(0 0 10px #0ff); 
+    z-index: 999999; 
+    transition: transform 0.3s ease;
 }
 
+.chat-btn:hover { 
+    transform: scale(1.1); 
+    filter: drop-shadow(0 0 20px #0ff);
+}
+
+.chat-robot-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* --- CONTENEDOR DEL CHAT (ESTILO VENTANA FLOTANTE / TINA) --- */
 #chat-container {
     position: fixed;
-    bottom: 95px;
+    bottom: 95px; /* Por encima del botón del robot */
     right: 20px;
     width: 320px;
     height: 450px;
-    background: rgba(5, 5, 5, 0.95);
+    background: rgba(5, 5, 5, 0.9);
     border: 2px solid #0ff;
-    display: none;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    display: none; /* Controlado por JS */
     flex-direction: column;
     z-index: 999998;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/* Clase activa para animaciones */
+#chat-container.active {
+    display: flex;
+    animation: chatSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes chatSlideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Opciones interactivas dentro del chat */
+.user-option {
+    border: 1px solid #0ff;
+    padding: 10px;
+    margin-top: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.3s;
+    font-size: 0.75rem;
+    background: rgba(0, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+.user-option:hover {
+    background: #0ff;
+    color: #000;
+    box-shadow: 0 0 10px #0ff;
+}
+
+/* Estilo para los mensajes del bot */
+.bot-msg {
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 10px 10px 10px 0;
+    border-left: 3px solid #0ff;
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+/* --- FORMULARIO Y OTROS --- */
+.contact form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.contact input, .contact textarea {
+    background: #111;
+    border: 1px solid #0ff;
+    color: #fff;
+    padding: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.contact input:focus, .contact textarea:focus {
+    box-shadow: 0 0 10px #0ff;
+    border-color: #fff;
+}
+
+#success-overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 30000; 
+    display: none; flex-direction: column; justify-content: center; align-items: center; 
+    text-align: center; backdrop-filter: blur(5px);
+}
+
+#denied-overlay {
+    position: fixed; inset: 0; background: #000; z-index: 20000;
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 20px;
+}
+
+/* RESPONSIVO PARA MÓVILES */
+@media (max-width: 600px) {
+    nav { padding: 15px 20px; flex-direction: column; gap: 10px; }
+    nav h1 { font-size: 1rem; }
+    nav div a { margin-left: 10px; font-size: 0.6rem; }
+    .hero h2 { font-size: 1.8rem; }
+    
+    #chat-container {
+        width: 90%;
+        right: 5%;
+        bottom: 85px;
+        height: 60vh;
+    }
 }
