@@ -58,7 +58,7 @@ function chatLogic(op) {
     msgs.scrollTop = msgs.scrollHeight;
 }
 
-// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
+// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO (CORREGIDO PARA MÓVIL)
 function openWindow(game) {
     stopGame(); 
     currentGame = game;
@@ -67,6 +67,9 @@ function openWindow(game) {
     const btn = document.getElementById("startBtn");
     const overlay = document.getElementById("overlay");
     const canvas = document.getElementById("gameCanvas");
+
+    // BLOQUEAR SCROLL: Evita que la página se mueva mientras juegas
+    document.body.style.overflow = "hidden";
 
     if(win) win.classList.add("active");
     if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
@@ -84,6 +87,7 @@ function stopGame() {
     if (animationId) cancelAnimationFrame(animationId); 
     if (window.gameInterval) clearInterval(window.gameInterval);
     document.onkeydown = null; 
+    // Limpiamos eventos táctiles para que no queden "pegados"
     window.ontouchstart = null;
     window.ontouchmove = null;
 }
@@ -103,7 +107,12 @@ function initGame() {
 }
 
 function closeWindow() { 
-    document.getElementById("gameWindow").classList.remove("active"); 
+    const win = document.getElementById("gameWindow");
+    if(win) win.classList.remove("active"); 
+    
+    // DEVOLVER SCROLL: Permite que el usuario vuelva a navegar por la página
+    document.body.style.overflow = "auto";
+    
     stopGame(); 
 }
 
@@ -118,9 +127,11 @@ function gameOver(score) {
     const overlay = document.getElementById("overlay");
     if(fScore) fScore.innerText = "PUNTAJE: " + score;
     if(overlay) overlay.style.display = "flex";
+    
+    // Al perder, dejamos el scroll bloqueado para que el usuario pueda 
+    // darle a "Reintentar" sin que la pantalla baile.
     stopGame();
 }
-
 // ================= CÓDIGO DE LOS JUEGOS (CONTROLES PANTALLA COMPLETA) =================
 
 function startSnake() {
