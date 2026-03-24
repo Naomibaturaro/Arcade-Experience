@@ -2,21 +2,20 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-    /* Crucial para que el touch global no mueva la pantalla de fondo */
-    overflow: hidden;
-    height: 100%;
+    /* CORRECCIÓN: Quitamos el 'fixed' y 'overflow: hidden' para permitir el scroll */
+    overflow-x: hidden; 
+    height: auto;
+    min-height: 100%;
     width: 100%;
-    position: fixed; 
-    touch-action: none; 
+    /* Evita el bounce effect en iOS sin bloquear el desplazamiento */
+    overscroll-behavior-y: contain;
 }
 
 body {
     font-family: 'Orbitron', sans-serif;
     background: #050505;
     color: #fff;
-    overflow-x: hidden;
     scroll-behavior: smooth;
-    overscroll-behavior-y: contain;
 }
 
 /* LOADER CON ROBOT 3D */
@@ -92,7 +91,7 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
 .card:hover { transform: translateY(-10px); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); border-color: #ff00ff; }
 .card h3 { color: #0ff; margin-bottom: 10px; font-size: 1.2rem; }
 
-/* --- VENTANAS DE JUEGO (OPTIMIZADO MÓVIL) --- */
+/* --- VENTANAS DE JUEGO --- */
 .window {
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0);
@@ -110,7 +109,6 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     background: #000; border: 2px solid #ff00ff;
     width: 100%; height: auto; display: block;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
-    /* Desactiva gestos nativos para que no interfieran con el JS */
     touch-action: none; 
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -126,13 +124,13 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
 }
 .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff00ff; background: #ff33ff; }
 
-/* --- BOTÓN DEL CHAT (ROBOT FLOTANTE) --- */
+/* --- BOTÓN DEL CHAT (CORREGIDO) --- */
 .chat-btn { 
     position: fixed; 
     bottom: 20px; 
     right: 20px; 
-    width: 65px; 
-    height: 65px; 
+    width: 70px; /* Tamaño fijo para el contenedor */
+    height: 70px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -141,6 +139,13 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     z-index: 999999; 
     transition: transform 0.3s ease;
     -webkit-tap-highlight-color: transparent;
+}
+
+.chat-robot-img {
+    width: 100%; /* Obliga a la imagen a no salirse del botón */
+    height: auto;
+    display: block;
+    object-fit: contain;
 }
 
 /* --- CONTENEDOR DEL CHAT --- */
@@ -157,77 +162,4 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     display: none;
     flex-direction: column;
     z-index: 999998;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    /* Permitimos scroll solo dentro del chat */
-    touch-action: auto; 
-}
-
-#chat-container.active {
-    display: flex;
-    animation: chatSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.user-option {
-    border: 1px solid #0ff;
-    padding: 10px;
-    margin-top: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: 0.3s;
-    font-size: 0.75rem;
-    background: rgba(0, 255, 255, 0.05);
-    border-radius: 5px;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* --- FORMULARIO Y OTROS --- */
-.contact form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 500px;
-    margin: 20px auto;
-    /* Permitimos touch en formulario */
-    touch-action: auto; 
-}
-
-.contact input, .contact textarea {
-    background: #111;
-    border: 1px solid #0ff;
-    color: #fff;
-    padding: 12px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    outline: none;
-    transition: 0.3s;
-}
-
-#success-overlay, #denied-overlay {
-    position: fixed; inset: 0; z-index: 30000; 
-    display: none; flex-direction: column; justify-content: center; align-items: center; 
-    text-align: center; padding: 20px;
-}
-
-/* RESPONSIVO PARA MÓVILES */
-@media (max-width: 600px) {
-    nav { padding: 15px 20px; flex-direction: column; gap: 10px; }
-    nav h1 { font-size: 1.1rem; }
-    nav div a { margin-left: 10px; font-size: 0.7rem; }
-    .hero { height: 30vh; }
-    .hero h2 { font-size: 1.8rem; }
-    
-    #chat-container {
-        width: 90vw;
-        right: 5vw;
-        bottom: 90px;
-        height: 55vh;
-    }
-
-    .window {
-        width: 98vw;
-        padding: 5px;
-    }
-}
+    overflow:
