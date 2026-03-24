@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Arcade Experience | Neon Edition</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style-arcade.css">
 </head>
 <body>
@@ -48,46 +46,49 @@
             <h3>SNAKE</h3>
             <p>Protocolo de crecimiento infinito</p>
         </div>
-        <div class="card" onclick="openWindow('dodge')">
-            <h3>DODGE</h3>
-            <p>Simulación de evasión de riesgos</p>
+        <div class="card" onclick="openWindow('pacman')">
+            <h3>PAC-MAN</h3>
+            <p>Simulación de recolección de datos</p>
         </div>
-        <div class="card" onclick="openWindow('jump')">
-            <h3>JUMP</h3>
-            <p>Prueba de altitud máxima</p>
-        </div>
-        <div class="card" onclick="openWindow('bouncing')">
-            <h3>REBOTE</h3>
+        <div class="card" onclick="openWindow('breakout')">
+            <h3>BREAKOUT</h3>
             <p>Destrucción de barreras físicas</p>
         </div>
-    </section>
-
-    <section id="contact" class="contact" style="padding: 60px 20px; text-align: center; background: #070707;">
-        <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
-        <form action="https://formsubmit.co/ajax/naomibaturaro@hotmail.com" method="POST" style="max-width: 500px; margin: 20px auto;">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
-            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
-            <textarea name="report" placeholder="DESCRIBE LA ANOMALÍA" rows="4" required></textarea>
-            <button type="submit" class="btn-neon" style="width: 100%;">ENVIAR DATA</button>
-        </form>
+        <div class="card" onclick="openWindow('dodge')">
+            <h3>DODGE</h3>
+            <p>Prueba de evasión de riesgos</p>
+        </div>
     </section>
 
     <div id="gameWindow" class="window">
         <div class="window-header">
-            <span id="gameTitle" style="color:#0ff; font-size:0.8rem">SISTEMA LISTO</span>
-            <button onclick="closeWindow()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-family:'Orbitron'">[X]</button>
+            <span id="gameTitle">SISTEMA LISTO</span>
+            <button class="close-btn" onclick="closeWindow()">[X]</button>
         </div>
-        <div class="window-content" style="padding: 10px;">
-            <div id="overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content:center; align-items:center; z-index: 10;">
-                <h2 style="color:#f0f; margin-bottom:10px">MISIÓN FALLIDA</h2>
-                <p id="finalScore" style="margin-bottom:15px">PUNTAJE: 0</p>
+        
+        <div class="canvas-container">
+            <div id="overlay">
+                <h2>MISIÓN FALLIDA</h2>
+                <p id="finalScore">PUNTAJE: 0</p>
                 <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
             </div>
-            <button id="startBtn" class="btn-neon" style="width:100%; margin-bottom:10px" onclick="initGame()">INICIAR MÓDULO</button>
+            
+            <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:5;" onclick="initGame()">INICIAR</button>
+            
             <canvas id="gameCanvas" width="400" height="300"></canvas>
         </div>
     </div>
+
+    <section id="contact" class="contact">
+        <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
+        <form action="https://formsubmit.co/ajax/tu-email@ejemplo.com" method="POST">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
+            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
+            <textarea name="report" placeholder="DESCRIBE LA ANOMALÍA" rows="4" required></textarea>
+            <button type="submit" class="btn-neon">ENVIAR DATA</button>
+        </form>
+    </section>
 
     <div class="chat-btn" onclick="toggleChat()">
         <img src="img/robot.png" alt="Asistente Robot" class="chat-robot-img">
@@ -96,25 +97,22 @@
     <div id="chat-container">
         <div style="background:#111; padding:12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #0ff;">
             <span style="font-size:0.7rem; color:#0ff; font-weight:bold;">SISTEMA DE ASISTENCIA</span>
-            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-size:1rem;">[X]</button>
+            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer;">[X]</button>
         </div>
-        <div id="chat-messages" style="flex-grow:1; padding:15px; overflow-y:auto; font-size:0.8rem; display:flex; flex-direction:column; gap:10px;">
-            <div style="background:#222; padding:10px; border-radius:10px 10px 10px 0; border-left:3px solid #0ff;">
-                Hola. Soy el asistente de Arcade Experience. ¿En qué módulo puedo ayudarte?
-            </div>
-            
+        <div id="chat-messages">
+            <div class="bot-msg">Hola. Soy el asistente de Arcade Experience. ¿En qué módulo puedo ayudarte?</div>
             <div class="user-option" onclick="openRandomGame()">🎮 JUEGO AL AZAR</div>
             <div class="user-option" onclick="chatLogic('juegos')">🔍 SUGERIRME UN JUEGO</div>
             <div class="user-option" onclick="chatLogic('error')">⚠️ REPORTAR ANOMALÍA</div>
         </div>
     </div>
 
-    <div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div id="success-overlay">
         <div class="robot-3d-container">
-            <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
+            <img src="img/robot.png" alt="Robot" class="robot-img">
         </div>
-        <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
-        <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
+        <h1>¡DATA RECIBIDA!</h1>
+        <p>SISTEMA: La anomalía ha sido registrada con éxito.</p>
         <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
     </div>
 
