@@ -84,6 +84,8 @@ function stopGame() {
     if (animationId) cancelAnimationFrame(animationId); 
     if (window.gameInterval) clearInterval(window.gameInterval);
     document.onkeydown = null; 
+    window.ontouchstart = null;
+    window.ontouchmove = null;
 }
 
 function initGame() {
@@ -119,13 +121,7 @@ function gameOver(score) {
     stopGame();
 }
 
-function getInputX(e, canvas) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) * (canvas.width / rect.width);
-}
-
-// ================= CÓDIGO DE LOS JUEGOS (OPTIMIZADO MÓVIL) =================
+// ================= CÓDIGO DE LOS JUEGOS (CONTROLES PANTALLA COMPLETA) =================
 
 function startSnake() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
@@ -138,18 +134,17 @@ function startSnake() {
         if (e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
     };
 
-    canvas.ontouchstart = (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const tx = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
-        const ty = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height);
-        if (Math.abs(tx - 200) > Math.abs(ty - 150)) {
-            if (tx > 200 && dx === 0) { dx = 20; dy = 0; }
-            else if (tx < 200 && dx === 0) { dx = -20; dy = 0; }
-        } else {
-            if (ty > 150 && dy === 0) { dx = 0; dy = 20; }
-            else if (ty < 150 && dy === 0) { dx = 0; dy = -20; }
-        }
+    window.ontouchstart = (e) => {
+        if (!gameActive) return;
+        const touch = e.touches[0];
+        const screenW = window.innerWidth, screenH = window.innerHeight;
+        const x = touch.clientX, y = touch.clientY;
+        const slope = screenH / screenW;
+
+        if (y < x * slope && y < screenH - x * slope) { if (dy === 0) { dx = 0; dy = -20; } } 
+        else if (y > x * slope && y > screenH - x * slope) { if (dy === 0) { dx = 0; dy = 20; } }
+        else if (x < screenW / 2) { if (dx === 0) { dx = -20; dy = 0; } }
+        else { if (dx === 0) { dx = 20; dy = 0; } }
     };
 
     function loop(time) {
@@ -169,12 +164,14 @@ function startSnake() {
 
 function startBouncing() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let bx=200, by=200, bdx=6, bdy=-6, px=160, particles = [], bricks = [];
-    for(let c=0; c<6; c++) {
-        bricks[c] = [];
-        for(let r=0; r<4; r++) bricks[c][r] = { status: 1, color: `hsl(${Math.random() * 360}, 70%, 60%)` };
-    }
-    canvas.onmousemove = canvas.ontouchmove = (e) => { if(e.touches) e.preventDefault(); px = getInputX(e, canvas) - 40; };
+    let bx=200, by=200, bdx=6, bdy=-6, px=160;
+
+    window.ontouchmove = (e) => {
+        if (!gameActive) return;
+        const touchX = e.touches[0].clientX;
+        px = (touchX / window.innerWidth) * 400 - 40;
+    };
+
     function loop() {
         if (!gameActive) return;
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)"; ctx.fillRect(0, 0, 400, 300);
@@ -192,14 +189,19 @@ function startBouncing() {
 
 function startDodge() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let px = 180, obs = [], keys = {};
-    document.onkeydown = (e) => keys[e.key] = true;
-    document.onkeyup = (e) => keys[e.key] = false;
-    canvas.onmousemove = canvas.ontouchmove = (e) => { if(e.touches) e.preventDefault(); px = getInputX(e, canvas) - 10; };
+    let px = 180, obs = [];
+    
+    window.ontouchmove = (e) => {
+        if (!gameActive) return;
+        const touchX = e.touches[0].clientX;
+        px = (touchX / window.innerWidth) * 400 - 10;
+    };
+
     window.gameInterval = setInterval(() => {
         if(!gameActive) return;
         obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, speed: 3 + Math.random() * 3 });
     }, 450);
+
     function loop() {
         if (!gameActive) return;
         if (px < 0) px = 0; if (px > 380) px = 380;
@@ -218,23 +220,20 @@ function startDodge() {
 
 function startJump() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let jx = 200, jy = 200, jv = 0, jSpeed = 0, keys = {}, plats = [];
+    let jx = 200, jy = 200, jv = 0, jSpeed = 0, plats = [];
     for(let i=0; i<6; i++) plats.push({x: Math.random()*340, y: i*55});
-    document.onkeydown = (e) => keys[e.key] = true;
-    document.onkeyup = (e) => keys[e.key] = false;
     
-    canvas.ontouchstart = (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const tx = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
-        if (tx < 130) jSpeed = -8; 
-        else if (tx > 270) jSpeed = 8; 
+    window.ontouchstart = (e) => {
+        if (!gameActive) return;
+        const tx = e.touches[0].clientX;
+        const screenW = window.innerWidth;
+        if (tx < screenW * 0.35) jSpeed = -8; 
+        else if (tx > screenW * 0.65) jSpeed = 8; 
         else jSpeed = 0;
     };
 
     function loop() {
         if (!gameActive) return;
-        if (keys["ArrowLeft"]) jSpeed -= 0.8; if (keys["ArrowRight"]) jSpeed += 0.8;
         jSpeed *= 0.92; jx += jSpeed;
         if (jx < -20) jx = 400; if (jx > 400) jx = -20;
         jv += 0.5; jy += jv;
@@ -275,7 +274,7 @@ if (reportForm) {
         } catch (error) {
             alert("SISTEMA OFFLINE.");
         } finally {
-            btn.innerText = "ENVIAR REPORTE";
+            btn.innerText = "ENVIAR DATA";
             btn.disabled = false;
         }
     };
