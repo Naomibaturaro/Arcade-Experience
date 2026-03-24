@@ -68,7 +68,7 @@ function processLogin() {
 
         if (pendingAction === 'arcade') {
             setTimeout(() => {
-                window.location.href = 'arcade.html';
+                window.location.href = 'index-arcade.html';
             }, 1500);
         }
     } else {
