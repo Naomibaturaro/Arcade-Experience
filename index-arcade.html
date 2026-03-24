@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -64,7 +64,7 @@
 
     <section id="contact" class="contact" style="padding: 60px 20px; text-align: center; background: #070707;">
         <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
-        <form action="https://formsubmit.co/naomibaturaro@hotmail.com" method="POST" style="max-width: 500px; margin: 20px auto;">
+        <form action="https://formsubmit.co/ajax/naomibaturaro@hotmail.com" method="POST" style="max-width: 500px; margin: 20px auto;">
             <input type="hidden" name="_captcha" value="false">
             <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
             <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
@@ -102,6 +102,14 @@
             <div class="user-option" style="border:1px solid #0ff; padding:5px; margin-top:5px; cursor:pointer; text-align:center;" onclick="openRandomGame()">Juego al azar</div>
         </div>
     </div>
+<div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div class="robot-3d-container">
+        <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
+    </div>
+    <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
+    <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
+    <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
+</div>
 
     <script src="script-arcade.js"></script>
 </body>
