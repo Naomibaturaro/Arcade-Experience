@@ -1,18 +1,15 @@
 // 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
 window.onload = () => {
-    // Si no hay sesión, bloqueamos todo
     if (!sessionStorage.getItem('sessionActive')) {
         const denied = document.getElementById('denied-overlay');
         if(denied) denied.style.display = 'flex';
         return;
     }
 
-    // Bienvenida personalizada
     const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
     const welcomeTitle = document.getElementById('welcome-user');
     if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
 
-    // Quitar loader con efecto suave
     setTimeout(() => {
         const loader = document.getElementById("loader");
         if(loader) {
@@ -24,25 +21,23 @@ window.onload = () => {
 
 // 2. VARIABLES DE ESTADO GLOBALES
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
+let touchX = null, touchY = null;
 
 // 3. LÓGICA DEL ASISTENTE / CHAT
 function toggleChat() {
     const chat = document.getElementById('chat-container');
-    if (chat) {
-        // Usamos la clase 'active' para disparar la animación de CSS
-        if (chat.classList.contains('active')) {
-            chat.classList.remove('active');
-            setTimeout(() => { chat.style.display = 'none'; }, 300);
-        } else {
-            chat.style.display = 'flex';
-            // Pequeño delay para que el navegador registre el display:flex antes de la animación
-            setTimeout(() => { chat.classList.add('active'); }, 10);
-        }
+    if (!chat) return;
+    if (chat.classList.contains('active')) {
+        chat.classList.remove('active');
+        setTimeout(() => { chat.style.display = 'none'; }, 300);
+    } else {
+        chat.style.display = 'flex';
+        setTimeout(() => { chat.classList.add('active'); }, 10);
     }
 }
 
 function openRandomGame() {
-    const games = ['snake', 'bouncing', 'dodge', 'jump'];
+    const games = ['snake', 'pacman', 'dodge', 'breakout'];
     const randomGame = games[Math.floor(Math.random() * games.length)];
     const msgs = document.getElementById('chat-messages');
     
@@ -69,9 +64,8 @@ function chatLogic(op) {
             "Probá 'JUMP', es ideal para superar récords."
         ];
         resp = sugerencias[Math.floor(Math.random() * sugerencias.length)];
-    } 
-    else if (op === 'error') {
-        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página para que pueda procesarlo.";
+    } else if (op === 'error') {
+        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página.";
         setTimeout(() => {
             toggleChat();
             document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
@@ -82,29 +76,15 @@ function chatLogic(op) {
     msgs.scrollTop = msgs.scrollHeight;
 }
 
-let touchX = null;
-let touchY = null;
+// Eventos de Touch
+document.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener("touchmove", (e) => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener("touchend", () => { touchX = null; touchY = null; });
 
-document.addEventListener("touchstart", (e) => {
-    touchX = e.touches[0].clientX;
-    touchY = e.touches[0].clientY;
-}, { passive: true });
-
-document.addEventListener("touchmove", (e) => {
-    touchX = e.touches[0].clientX;
-    touchY = e.touches[0].clientY;
-}, { passive: true });
-
-document.addEventListener("touchend", () => {
-    touchX = null;
-    touchY = null;
-});
-
-// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
+/// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
 function openWindow(game) {
     stopGame(); 
     currentGame = game;
-    
     const win = document.getElementById("gameWindow");
     const title = document.getElementById("gameTitle");
     const btn = document.getElementById("startBtn");
@@ -127,8 +107,14 @@ function stopGame() {
     if (animationId) cancelAnimationFrame(animationId); 
     if (window.gameInterval) clearInterval(window.gameInterval);
     document.onkeydown = null; 
-    touchX = null;
-    touchY = null;
+}
+
+// ESTA FUNCIÓN DEBE ESTAR AFUERA
+function restartCurrentGame() {
+    const overlay = document.getElementById("overlay");
+    if(overlay) overlay.style.display = "none";
+    stopGame(); 
+    initGame(); 
 }
 
 function initGame() {
@@ -141,230 +127,253 @@ function initGame() {
     globalScore = 0;
 
     if(currentGame === 'snake') startSnake();
-    else if(currentGame === 'bouncing') startBouncing();
+    else if(currentGame === 'breakout') startBreakout();
     else if(currentGame === 'dodge') startDodge();
-    else if(currentGame === 'jump') startJump();
+    else if(currentGame === 'pacman') startPacMan();
 }
+// ================= JUEGOS CORREGIDOS =================
 
-function closeWindow() { 
-    document.getElementById("gameWindow").classList.remove("active"); 
-    stopGame(); 
+function startPacMan() {
+    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+    const grid = 20;
+    let score = 0;
+    
+    // El laberinto actual (5 filas x 20 columnas)
+    const maze = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+        [1,2,1,2,1,2,1,1,2,1,2,1,1,1,1,1,1,1,2,1],
+        [1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    // --- CÁLCULO DE CENTRADO ---
+    // El laberinto mide: ancho = 20 * 20 (400) | alto = 5 * 20 (100)
+    // El canvas mide: 400 x 300
+    const offsetX = (canvas.width - (maze[0].length * grid)) / 2; // Será 0 porque ocupa todo el ancho
+    const offsetY = (canvas.height - (maze.length * grid)) / 2;    // Será (300 - 100) / 2 = 100px de margen arriba
+
+    let px = 20 + offsetX, py = 20 + offsetY; 
+    let dir = {x:0, y:0}, speed = 2;
+
+    const ghosts = [
+        {x: 100 + offsetX, y: 20 + offsetY, color: "#f00", dx: speed, dy: 0},
+        {x: 200 + offsetX, y: 60 + offsetY, color: "#0f0", dx: -speed, dy: 0}
+    ];
+
+    document.onkeydown = (e) => {
+        if(e.key === "ArrowLeft") dir={x:-speed, y:0};
+        else if(e.key === "ArrowRight") dir={x:speed, y:0};
+        else if(e.key === "ArrowUp") dir={x:0, y:-speed};
+        else if(e.key === "ArrowDown") dir={x:0, y:speed};
+    };
+
+    function loop() {
+        if(!gameActive) return;
+        
+        // Movimiento con colisiones relativas al offsetY
+        let nextX = px + dir.x;
+        let nextY = py + dir.y;
+        
+        // Ajustamos el cálculo de colisión restando el offset
+        let col = Math.floor((nextX - offsetX + grid/2) / grid);
+        let row = Math.floor((nextY - offsetY + grid/2) / grid);
+
+        if (maze[row] && maze[row][col] !== 1) {
+            px = nextX; py = nextY;
+            if(maze[row][col] === 2) { 
+                maze[row][col] = 0; 
+                score += 10; 
+                globalScore = score; // Actualizamos la global
+            }
+        }
+
+        ctx.fillStyle="#000"; ctx.fillRect(0,0,400,300);
+        
+        // Dibujar Maze con el Offset
+        for(let r=0; r<maze.length; r++){
+            for(let c=0; c<maze[r].length; c++){
+                let x = c * grid + offsetX;
+                let y = r * grid + offsetY;
+                if(maze[r][c] === 1){ 
+                    ctx.fillStyle="#00f"; 
+                    ctx.fillRect(x, y, grid, grid); 
+                }
+                else if(maze[r][c] === 2){ 
+                    ctx.fillStyle="#ff0"; 
+                    ctx.beginPath(); 
+                    ctx.arc(x + grid/2, y + grid/2, 3, 0, Math.PI*2); 
+                    ctx.fill(); 
+                }
+            }
+        }
+
+        // Pacman
+        ctx.fillStyle="#ff0"; 
+        ctx.beginPath(); 
+        ctx.arc(px + grid/2, py + grid/2, grid/2-2, 0, Math.PI*2); 
+        ctx.fill();
+
+        // Fantasmas
+        ghosts.forEach(g => {
+            g.x += g.dx; g.y += g.dy;
+            let gCol = Math.floor((g.x - offsetX + grid/2) / grid);
+            let gRow = Math.floor((g.y - offsetY + grid/2) / grid);
+            
+            if(!maze[gRow] || maze[gRow][gCol] === 1) { g.dx *= -1; g.dy *= -1; }
+
+            ctx.fillStyle=g.color; 
+            ctx.beginPath(); 
+            ctx.arc(g.x + grid/2, g.y + grid/2, grid/2-2, 0, Math.PI*2); 
+            ctx.fill();
+            
+            if(Math.abs(px - g.x) < 15 && Math.abs(py - g.y) < 15) gameOver(score);
+        });
+
+        animationId = requestAnimationFrame(loop);
+    }
+    loop();
 }
+function startBreakout() {
+    const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+    let paddleX=160, ballX=200, ballY=250, ballDX=3, ballDY=-3, score=0;
+    const rows=3, cols=6, bricks=[];
+    let keys = {};
 
-function restartCurrentGame() { 
-    stopGame(); 
-    initGame(); 
+    for(let c=0;c<cols;c++){
+        bricks[c]=[];
+        for(let r=0;r<rows;r++){ bricks[c][r]={x:0,y:0,status:1,color: `hsl(${c*40},70%,60%)`}; }
+    }
+
+    document.onkeydown = (e) => keys[e.key] = true;
+    document.onkeyup = (e) => keys[e.key] = false;
+
+    function loop() {
+        if(!gameActive) return;
+        if(keys.ArrowLeft && paddleX > 0) paddleX -= 6;
+        if(keys.ArrowRight && paddleX < 320) paddleX += 6;
+
+        ballX += ballDX; ballY += ballDY;
+        if(ballX<0 || ballX>390) ballDX *= -1;
+        if(ballY<0) ballDY *= -1;
+        if(ballY>290) { gameOver(score); return; }
+
+        if(ballY>275 && ballX>paddleX && ballX<paddleX+80) ballDY = -Math.abs(ballDY);
+
+        ctx.fillStyle="#000"; ctx.fillRect(0,0,400,300);
+        ctx.fillStyle="#0ff"; ctx.fillRect(paddleX,280,80,10);
+        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(ballX,ballY,6,0,Math.PI*2); ctx.fill();
+
+        bricks.forEach((col, c) => col.forEach((b, r) => {
+            if (b.status) {
+                let bx=c*65+10, by=r*25+30;
+                if(ballX>bx && ballX<bx+60 && ballY>by && ballY<by+20) { b.status=0; ballDY*=-1; score+=10; globalScore=score; }
+                ctx.fillStyle = b.color; ctx.fillRect(bx, by, 60, 20);
+            }
+        }));
+
+        animationId = requestAnimationFrame(loop);
+    }
+    loop();
 }
-
-function gameOver(score) {
-    gameActive = false;
-    const fScore = document.getElementById("finalScore");
-    const overlay = document.getElementById("overlay");
-    if(fScore) fScore.innerText = "PUNTAJE: " + score;
-    if(overlay) overlay.style.display = "flex";
-    stopGame();
-}
-
-function getInputX(e, canvas) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) * (canvas.width / rect.width);
-}
-
-// ================= CÓDIGO DE LOS JUEGOS =================
 
 function startSnake() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let snake = [{x: 200, y: 140}, {x: 180, y: 140}], food = {x: 100, y: 100}, dx = 20, dy = 0, lastUpdate = 0;
-    function handleSnakeTouch() {
-    if (touchX === null) return;
+    let snake = [{x: 200, y: 140}, {x: 180, y: 140}];
+    let food = {x: 100, y: 100};
+    let dx = 20, dy = 0, lastUpdate = 0;
+    let changingDirection = false; // Bloqueo para evitar giros de 180 grados rápidos
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-
-    if (touchY < h * 0.3 && dy === 0) { dx = 0; dy = -20; } // arriba
-    else if (touchY > h * 0.7 && dy === 0) { dx = 0; dy = 20; } // abajo
-    else if (touchX < w * 0.5 && dx === 0) { dx = -20; dy = 0; } // izquierda
-    else if (touchX >= w * 0.5 && dx === 0) { dx = 20; dy = 0; } // derecha
-}
- 
+    document.onkeydown = (e) => {
+        if (changingDirection) return;
+        changingDirection = true;
+        
+        if(e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
+        else if(e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
+        else if(e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
+        else if(e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
+    };
 
     function loop(time) {
         if (!gameActive) return;
         animationId = requestAnimationFrame(loop);
-        handleSnakeTouch();
-        if (time - lastUpdate < 85) return;
+        
+        // Control de velocidad (100ms es una velocidad arcade clásica)
+        if (time - lastUpdate < 100) return;
         lastUpdate = time;
+        changingDirection = false; // Desbloqueamos el giro en cada frame
+
         const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-        if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 300 || snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(globalScore); return; }
-        snake.unshift(head);
-        if (head.x === food.x && head.y === food.y) { globalScore += 10; food = {x: Math.floor(Math.random()*19)*20, y: Math.floor(Math.random()*14)*20}; } else snake.pop();
-        ctx.clearRect(0,0,400,300); ctx.fillStyle = "#f0f"; ctx.fillRect(food.x, food.y, 18, 18);
-        ctx.fillStyle = "#0ff"; snake.forEach(s => ctx.fillRect(s.x, s.y, 18, 18));
-    }
-    animationId = requestAnimationFrame(loop);
-}
 
-function startBouncing() {
-    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let bx=200, by=200, bdx=6, bdy=-6, px=160; 
-    let speedMax = 12, particles = [], bricks = [];
-    const rows = 4, cols = 6;
-    for(let c=0; c<cols; c++) {
-        bricks[c] = [];
-        for(let r=0; r<rows; r++) bricks[c][r] = { status: Math.random() > 0.8 ? 2 : 1, color: `hsl(${Math.random() * 360}, 70%, 60%)` };
-    }
-    function handleBouncingTouch() {
-    if (touchX === null) return;
-
-    const w = window.innerWidth;
-    px = (touchX / w) * 400 - 40;
-
-    // límites
-    if (px < 0) px = 0;
-    if (px > 320) px = 320;
-}
-    function loop() {
-        if (!gameActive) return;
-        handleBouncingTouch();
-        ctx.fillStyle = "rgba(0, 0, 0, 0.4)"; ctx.fillRect(0, 0, 400, 300);
-        particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.07; ctx.fillStyle = p.c; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, 2, 2); if(p.life <= 0) particles.splice(i, 1); });
-        ctx.globalAlpha = 1;
-        for(let c=0; c<cols; c++) {
-            for(let r=0; r<rows; r++) {
-                let b = bricks[c][r];
-                if(b.status > 0) {
-                    let rx = c * 65 + 10, ry = r * 25 + 40;
-                    ctx.fillStyle = b.status > 1 ? "#fff" : b.color; ctx.fillRect(rx, ry, 60, 18);
-                    if(bx > rx && bx < rx+60 && by > ry && by < ry+18) {
-                        bdy *= -1.03; b.status--; globalScore += 15; createExplosion(bx, by, b.color);
-                    }
-                }
-            }
+        // Colisiones con paredes y cuerpo
+        if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 300 || snake.some(s => s.x === head.x && s.y === head.y)) { 
+            gameOver(globalScore); 
+            return; 
         }
-        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "#0ff"; ctx.fillRect(px, 280, 80, 10);
-       bx += bdx;
+        
+        snake.unshift(head);
 
-// MÁS LENTO CUANDO BAJA
-if (bdy > 0) {
-    by += bdy * 0.75; // bajada más lenta
-} else {
-    by += bdy; // subida normal
-}
-        if(bx <= 0 || bx >= 400) { bdx *= -1; createExplosion(bx, by, "#fff"); }
-        if(by <= 0) bdy *= -1;
-        if(by > 275 && bx > px && bx < px+80) { bdx = ((bx - (px + 40)) / 40) * 8; bdy = -Math.abs(bdy) * 1.02; createExplosion(bx, 280, "#0ff"); }
-        if(by > 300) gameOver(globalScore);
-        animationId = requestAnimationFrame(loop);
+        // Si come
+        if (head.x === food.x && head.y === food.y) { 
+            globalScore += 10; 
+            // Cálculo exacto para que la comida SIEMPRE caiga en la rejilla de 20px
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+                y: Math.floor(Math.random() * (canvas.height / 20)) * 20
+            }; 
+        } else { 
+            snake.pop(); 
+        }
+
+        // Renderizado
+        ctx.clearRect(0, 0, 400, 300);
+        
+        // Dibujar comida (Neon Pink)
+        ctx.fillStyle = "#f0f";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#f0f";
+        ctx.fillRect(food.x, food.y, 18, 18);
+        
+        // Dibujar serpiente (Neon Cyan)
+        ctx.fillStyle = "#0ff";
+        ctx.shadowColor = "#0ff";
+        snake.forEach((s, index) => {
+            // La cabeza brilla un poco más
+            ctx.shadowBlur = index === 0 ? 15 : 5;
+            ctx.fillRect(s.x, s.y, 18, 18);
+        });
+        
+        // Limpiar sombras para no afectar otros elementos
+        ctx.shadowBlur = 0;
     }
-    animationId = requestAnimationFrame(loop);
+    loop(0);
 }
 
 function startDodge() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let px = 180, obs = [], keys = {}, speedMultiplier = 1;
+    let px = 180, obs = [], keys = {};
     document.onkeydown = (e) => keys[e.key] = true;
     document.onkeyup = (e) => keys[e.key] = false;
-    function handleDodgeTouch() {
-    if (touchX === null) return;
 
-    const w = window.innerWidth;
-    px = (touchX / w) * 400 - 10;
-}
     window.gameInterval = setInterval(() => {
         if(!gameActive) return;
-        let type = Math.random() > 0.8 ? 'GLITCH' : 'DATA'; 
-        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, type: type, speed: (3 + Math.random() * 3) * speedMultiplier });
-    }, 450);
+        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, speed: 3 + Math.random() * 3 });
+    }, 500);
+
     function loop() {
         if (!gameActive) return;
-        handleDodgeTouch();
-        if (keys["ArrowLeft"]) px -= 7; if (keys["ArrowRight"]) px += 7;
-        if (px < 0) px = 0; if (px > 380) px = 380;
-        ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.fillRect(0, 0, 400, 300);
-        ctx.fillStyle = "#0ff"; ctx.beginPath(); ctx.moveTo(px+10, 270); ctx.lineTo(px, 290); ctx.lineTo(px+20, 290); ctx.fill();
+        if (keys["ArrowLeft"] && px > 0) px -= 7; if (keys["ArrowRight"] && px < 380) px += 7;
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; ctx.fillRect(0, 0, 400, 300);
+        ctx.fillStyle = "#0ff"; ctx.fillRect(px, 270, 20, 20);
+
         obs.forEach((o, i) => {
             o.y += o.speed;
-            ctx.fillStyle = o.type === 'GLITCH' ? "#ff00ff" : "#fff";
-            ctx.fillRect(o.x, o.y, o.w, o.h);
-            if (o.y > 260 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) gameOver(globalScore);
+            ctx.fillStyle = "#f00"; ctx.fillRect(o.x, o.y, o.w, o.h);
+            if (o.y > 250 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) gameOver(globalScore);
             if (o.y > 300) { obs.splice(i, 1); globalScore++; }
         });
         animationId = requestAnimationFrame(loop);
     }
-    animationId = requestAnimationFrame(loop);
-}
-
-function startJump() {
-    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let jx = 200, jy = 200, jv = 0, jSpeed = 0, keys = {}, plats = [];
-    for(let i=0; i<6; i++) plats.push({x: Math.random()*340, y: i*55});
-    document.onkeydown = (e) => keys[e.key] = true;
-    document.onkeyup = (e) => keys[e.key] = false;
-    function handleJumpTouch() {
-    if (touchX === null) return;
-
-    const w = window.innerWidth;
-
-    if (touchX < w / 2) jSpeed -= 1.2;
-    else jSpeed += 1.2;
-}
-    function loop() {
-        if (!gameActive) return;
-        handleJumpTouch();
-        if (keys["ArrowLeft"]) jSpeed -= 0.8; if (keys["ArrowRight"]) jSpeed += 0.8;
-        jSpeed *= 0.9; jx += jSpeed;
-        if (jx < -20) jx = 400; if (jx > 400) jx = -20;
-        jv += 0.5; jy += jv;
-        if (jy < 120) { 
-            let diff = 120 - jy; jy = 120; globalScore++; 
-            plats.forEach(p => { p.y += diff; if(p.y > 300) { p.y = 0; p.x = Math.random()*340; } });
-        }
-        if (jy > 300) { gameOver(globalScore); return; }
-        ctx.clearRect(0,0,400,300);
-        plats.forEach(p => {
-            ctx.fillStyle = "#0ff"; ctx.fillRect(p.x, p.y, 60, 8);
-            if (jv > 0 && jy+20 >= p.y && jy+20 <= p.y+12 && jx+20 > p.x && jx < p.x+60) jv = -13;
-        });
-        ctx.fillStyle = "#f0f"; ctx.beginPath(); ctx.arc(jx+10, jy+10, 10, 0, Math.PI*2); ctx.fill();
-        animationId = requestAnimationFrame(loop);
-    }
-    animationId = requestAnimationFrame(loop);
-}
-
-// INTERCEPTOR DE FORMULARIO
-const reportForm = document.querySelector('#contact form');
-if (reportForm) {
-    reportForm.onsubmit = async (e) => {
-        e.preventDefault(); 
-        
-        const btn = reportForm.querySelector('button');
-        const originalText = btn.innerText;
-        btn.innerText = "ENVIANDO DATA...";
-        btn.disabled = true;
-
-        const formData = new FormData(reportForm);
-
-        try {
-            const response = await fetch(reportForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'Accept': 'application/json' }
-            });
-
-            if (response.ok) {
-                document.getElementById('success-overlay').style.display = 'flex';
-                reportForm.reset(); 
-            } else {
-                alert("ERROR DE SINCRONIZACIÓN: Intenta de nuevo.");
-            }
-        } catch (error) {
-            console.error("Error de red:", error);
-            alert("SISTEMA OFFLINE: Revisa tu conexión.");
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
-    };
+    loop();
 }
