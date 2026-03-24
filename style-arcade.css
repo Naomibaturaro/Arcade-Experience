@@ -125,3 +125,49 @@
             display: none; flex-direction: column; justify-content: center; align-items: center;
             text-align: center; padding: 20px;
         }
+/* --- ESTILO DEL FORMULARIO DE REPORTE --- */
+.contact form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre campos */
+}
+
+.contact input, 
+.contact textarea {
+    background: #111; /* Fondo oscuro */
+    border: 1px solid #0ff; /* Borde neón cian */
+    color: #fff;
+    padding: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    outline: none;
+    transition: 0.3s;
+}
+
+/* Efecto cuando hacés clic para escribir */
+.contact input:focus, 
+.contact textarea:focus {
+    box-shadow: 0 0 10px #0ff;
+    border-color: #fff;
+    background: #1a1a1a;
+}
+
+/* Color del texto de sugerencia (placeholder) */
+.contact input::placeholder, 
+.contact textarea::placeholder {
+    color: rgba(0, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+/* Ajuste específico para el botón del formulario */
+.contact .btn-neon {
+    margin-top: 10px;
+    letter-spacing: 2px;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 600px) {
+    .contact h2 { font-size: 1.5rem; }
+    .contact form { width: 90%; }
+}
