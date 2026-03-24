@@ -1,15 +1,18 @@
 // 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
 window.onload = () => {
+    // Si no hay sesión, bloqueamos todo
     if (!sessionStorage.getItem('sessionActive')) {
         const denied = document.getElementById('denied-overlay');
         if(denied) denied.style.display = 'flex';
         return;
     }
 
+    // Bienvenida personalizada
     const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
     const welcomeTitle = document.getElementById('welcome-user');
     if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
 
+    // Quitar loader con efecto suave
     setTimeout(() => {
         const loader = document.getElementById("loader");
         if(loader) {
@@ -26,11 +29,13 @@ let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 function toggleChat() {
     const chat = document.getElementById('chat-container');
     if (chat) {
+        // Usamos la clase 'active' para disparar la animación de CSS
         if (chat.classList.contains('active')) {
             chat.classList.remove('active');
             setTimeout(() => { chat.style.display = 'none'; }, 300);
         } else {
             chat.style.display = 'flex';
+            // Pequeño delay para que el navegador registre el display:flex antes de la animación
             setTimeout(() => { chat.classList.add('active'); }, 10);
         }
     }
@@ -40,10 +45,12 @@ function openRandomGame() {
     const games = ['snake', 'bouncing', 'dodge', 'jump'];
     const randomGame = games[Math.floor(Math.random() * games.length)];
     const msgs = document.getElementById('chat-messages');
+    
     if(msgs) {
         msgs.innerHTML += `<div class="bot-msg">🤖: ¡Buena elección! Iniciando ${randomGame.toUpperCase()}...</div>`;
         msgs.scrollTop = msgs.scrollHeight;
     }
+    
     setTimeout(() => { 
         if(document.getElementById('chat-container').classList.contains('active')) toggleChat();
         openWindow(randomGame); 
@@ -53,23 +60,38 @@ function openRandomGame() {
 function chatLogic(op) {
     const msgs = document.getElementById('chat-messages');
     if(!msgs) return;
-    let resp = (op === 'juegos') ? "Probá 'JUMP', es ideal para superar récords." : "¡Entendido! Completá el formulario de reporte.";
+
+    let resp = "";
+    if (op === 'juegos') {
+        const sugerencias = [
+            "Te recomiendo 'REBOTE', los efectos de partículas quedaron geniales.",
+            "Si buscas un reto, el modo 'DODGE' ahora es más veloz.",
+            "Probá 'JUMP', es ideal para superar récords."
+        ];
+        resp = sugerencias[Math.floor(Math.random() * sugerencias.length)];
+    } 
+    else if (op === 'error') {
+        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página para que pueda procesarlo.";
+        setTimeout(() => {
+            toggleChat();
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+        }, 1500);
+    }
+
     msgs.innerHTML += `<div class="bot-msg">🤖: ${resp}</div>`;
     msgs.scrollTop = msgs.scrollHeight;
 }
 
-// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO (CORREGIDO PARA MÓVIL)
+// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
 function openWindow(game) {
     stopGame(); 
     currentGame = game;
+    
     const win = document.getElementById("gameWindow");
     const title = document.getElementById("gameTitle");
     const btn = document.getElementById("startBtn");
     const overlay = document.getElementById("overlay");
     const canvas = document.getElementById("gameCanvas");
-
-    // BLOQUEAR SCROLL: Evita que la página se mueva mientras juegas
-    document.body.style.overflow = "hidden";
 
     if(win) win.classList.add("active");
     if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
@@ -87,9 +109,6 @@ function stopGame() {
     if (animationId) cancelAnimationFrame(animationId); 
     if (window.gameInterval) clearInterval(window.gameInterval);
     document.onkeydown = null; 
-    // Limpiamos eventos táctiles para que no queden "pegados"
-    window.ontouchstart = null;
-    window.ontouchmove = null;
 }
 
 function initGame() {
@@ -97,6 +116,7 @@ function initGame() {
     const overlay = document.getElementById("overlay");
     if(btn) btn.style.display = "none";
     if(overlay) overlay.style.display = "none";
+    
     gameActive = true; 
     globalScore = 0;
 
@@ -107,12 +127,7 @@ function initGame() {
 }
 
 function closeWindow() { 
-    const win = document.getElementById("gameWindow");
-    if(win) win.classList.remove("active"); 
-    
-    // DEVOLVER SCROLL: Permite que el usuario vuelva a navegar por la página
-    document.body.style.overflow = "auto";
-    
+    document.getElementById("gameWindow").classList.remove("active"); 
     stopGame(); 
 }
 
@@ -127,37 +142,26 @@ function gameOver(score) {
     const overlay = document.getElementById("overlay");
     if(fScore) fScore.innerText = "PUNTAJE: " + score;
     if(overlay) overlay.style.display = "flex";
-    
-    // Al perder, dejamos el scroll bloqueado para que el usuario pueda 
-    // darle a "Reintentar" sin que la pantalla baile.
     stopGame();
 }
-// ================= CÓDIGO DE LOS JUEGOS (CONTROLES PANTALLA COMPLETA) =================
+
+function getInputX(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return (clientX - rect.left) * (canvas.width / rect.width);
+}
+
+// ================= CÓDIGO DE LOS JUEGOS =================
 
 function startSnake() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
     let snake = [{x: 200, y: 140}, {x: 180, y: 140}], food = {x: 100, y: 100}, dx = 20, dy = 0, lastUpdate = 0;
-
     document.onkeydown = (e) => {
         if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
         if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
         if (e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
         if (e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
     };
-
-    window.ontouchstart = (e) => {
-        if (!gameActive) return;
-        const touch = e.touches[0];
-        const screenW = window.innerWidth, screenH = window.innerHeight;
-        const x = touch.clientX, y = touch.clientY;
-        const slope = screenH / screenW;
-
-        if (y < x * slope && y < screenH - x * slope) { if (dy === 0) { dx = 0; dy = -20; } } 
-        else if (y > x * slope && y > screenH - x * slope) { if (dy === 0) { dx = 0; dy = 20; } }
-        else if (x < screenW / 2) { if (dx === 0) { dx = -20; dy = 0; } }
-        else { if (dx === 0) { dx = 20; dy = 0; } }
-    };
-
     function loop(time) {
         if (!gameActive) return;
         animationId = requestAnimationFrame(loop);
@@ -175,23 +179,38 @@ function startSnake() {
 
 function startBouncing() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let bx=200, by=200, bdx=6, bdy=-6, px=160;
-
-    window.ontouchmove = (e) => {
-        if (!gameActive) return;
-        const touchX = e.touches[0].clientX;
-        px = (touchX / window.innerWidth) * 400 - 40;
-    };
-
+    let bx=200, by=200, bdx=6, bdy=-6, px=160; 
+    let speedMax = 12, particles = [], bricks = [];
+    const rows = 4, cols = 6;
+    for(let c=0; c<cols; c++) {
+        bricks[c] = [];
+        for(let r=0; r<rows; r++) bricks[c][r] = { status: Math.random() > 0.8 ? 2 : 1, color: `hsl(${Math.random() * 360}, 70%, 60%)` };
+    }
+    canvas.onmousemove = canvas.ontouchmove = (e) => { if(e.touches) e.preventDefault(); px = getInputX(e, canvas) - 40; };
+    function createExplosion(x, y, color) { for(let i=0; i<8; i++) particles.push({x: x, y: y, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, life: 1, c: color}); }
     function loop() {
         if (!gameActive) return;
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)"; ctx.fillRect(0, 0, 400, 300);
+        particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.07; ctx.fillStyle = p.c; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, 2, 2); if(p.life <= 0) particles.splice(i, 1); });
+        ctx.globalAlpha = 1;
+        for(let c=0; c<cols; c++) {
+            for(let r=0; r<rows; r++) {
+                let b = bricks[c][r];
+                if(b.status > 0) {
+                    let rx = c * 65 + 10, ry = r * 25 + 40;
+                    ctx.fillStyle = b.status > 1 ? "#fff" : b.color; ctx.fillRect(rx, ry, 60, 18);
+                    if(bx > rx && bx < rx+60 && by > ry && by < ry+18) {
+                        bdy *= -1.03; b.status--; globalScore += 15; createExplosion(bx, by, b.color);
+                    }
+                }
+            }
+        }
         ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = "#0ff"; ctx.fillRect(px, 280, 80, 10);
         bx += bdx; by += bdy;
-        if(bx <= 0 || bx >= 400) bdx *= -1;
+        if(bx <= 0 || bx >= 400) { bdx *= -1; createExplosion(bx, by, "#fff"); }
         if(by <= 0) bdy *= -1;
-        if(by > 275 && bx > px && bx < px+80) { bdy = -Math.abs(bdy) * 1.02; }
+        if(by > 275 && bx > px && bx < px+80) { bdx = ((bx - (px + 40)) / 40) * 8; bdy = -Math.abs(bdy) * 1.02; createExplosion(bx, 280, "#0ff"); }
         if(by > 300) gameOver(globalScore);
         animationId = requestAnimationFrame(loop);
     }
@@ -200,27 +219,25 @@ function startBouncing() {
 
 function startDodge() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let px = 180, obs = [];
-    
-    window.ontouchmove = (e) => {
-        if (!gameActive) return;
-        const touchX = e.touches[0].clientX;
-        px = (touchX / window.innerWidth) * 400 - 10;
-    };
-
+    let px = 180, obs = [], keys = {}, speedMultiplier = 1;
+    document.onkeydown = (e) => keys[e.key] = true;
+    document.onkeyup = (e) => keys[e.key] = false;
+    canvas.onmousemove = canvas.ontouchmove = (e) => px = getInputX(e, canvas) - 10;
     window.gameInterval = setInterval(() => {
         if(!gameActive) return;
-        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, speed: 3 + Math.random() * 3 });
+        let type = Math.random() > 0.8 ? 'GLITCH' : 'DATA'; 
+        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, type: type, speed: (3 + Math.random() * 3) * speedMultiplier });
     }, 450);
-
     function loop() {
         if (!gameActive) return;
+        if (keys["ArrowLeft"]) px -= 7; if (keys["ArrowRight"]) px += 7;
         if (px < 0) px = 0; if (px > 380) px = 380;
         ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.fillRect(0, 0, 400, 300);
-        ctx.fillStyle = "#0ff"; ctx.fillRect(px, 270, 20, 20);
+        ctx.fillStyle = "#0ff"; ctx.beginPath(); ctx.moveTo(px+10, 270); ctx.lineTo(px, 290); ctx.lineTo(px+20, 290); ctx.fill();
         obs.forEach((o, i) => {
             o.y += o.speed;
-            ctx.fillStyle = "#fff"; ctx.fillRect(o.x, o.y, o.w, o.h);
+            ctx.fillStyle = o.type === 'GLITCH' ? "#ff00ff" : "#fff";
+            ctx.fillRect(o.x, o.y, o.w, o.h);
             if (o.y > 260 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) gameOver(globalScore);
             if (o.y > 300) { obs.splice(i, 1); globalScore++; }
         });
@@ -231,21 +248,15 @@ function startDodge() {
 
 function startJump() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let jx = 200, jy = 200, jv = 0, jSpeed = 0, plats = [];
+    let jx = 200, jy = 200, jv = 0, jSpeed = 0, keys = {}, plats = [];
     for(let i=0; i<6; i++) plats.push({x: Math.random()*340, y: i*55});
-    
-    window.ontouchstart = (e) => {
-        if (!gameActive) return;
-        const tx = e.touches[0].clientX;
-        const screenW = window.innerWidth;
-        if (tx < screenW * 0.35) jSpeed = -8; 
-        else if (tx > screenW * 0.65) jSpeed = 8; 
-        else jSpeed = 0;
-    };
-
+    document.onkeydown = (e) => keys[e.key] = true;
+    document.onkeyup = (e) => keys[e.key] = false;
+    canvas.onmousemove = canvas.ontouchmove = (e) => jx = getInputX(e, canvas) - 10;
     function loop() {
         if (!gameActive) return;
-        jSpeed *= 0.92; jx += jSpeed;
+        if (keys["ArrowLeft"]) jSpeed -= 0.8; if (keys["ArrowRight"]) jSpeed += 0.8;
+        jSpeed *= 0.9; jx += jSpeed;
         if (jx < -20) jx = 400; if (jx > 400) jx = -20;
         jv += 0.5; jy += jv;
         if (jy < 120) { 
@@ -264,28 +275,37 @@ function startJump() {
     animationId = requestAnimationFrame(loop);
 }
 
-// 5. INTERCEPTOR DE FORMULARIO
+// INTERCEPTOR DE FORMULARIO
 const reportForm = document.querySelector('#contact form');
 if (reportForm) {
     reportForm.onsubmit = async (e) => {
         e.preventDefault(); 
+        
         const btn = reportForm.querySelector('button');
+        const originalText = btn.innerText;
         btn.innerText = "ENVIANDO DATA...";
         btn.disabled = true;
+
+        const formData = new FormData(reportForm);
+
         try {
             const response = await fetch(reportForm.action, {
                 method: 'POST',
-                body: new FormData(reportForm),
+                body: formData,
                 headers: { 'Accept': 'application/json' }
             });
+
             if (response.ok) {
                 document.getElementById('success-overlay').style.display = 'flex';
                 reportForm.reset(); 
+            } else {
+                alert("ERROR DE SINCRONIZACIÓN: Intenta de nuevo.");
             }
         } catch (error) {
-            alert("SISTEMA OFFLINE.");
+            console.error("Error de red:", error);
+            alert("SISTEMA OFFLINE: Revisa tu conexión.");
         } finally {
-            btn.innerText = "ENVIAR DATA";
+            btn.innerText = originalText;
             btn.disabled = false;
         }
     };
