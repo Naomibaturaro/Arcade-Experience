@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arcade Experience | Neon Edition</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style-arcade.css">
+</head>
+<body>
+
+    <div id="denied-overlay">
+        <div class="robot-3d-container">
+            <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #ff0044);">
+        </div>
+        <h1 style="color: #ff0044; font-size: 2rem; margin-bottom: 10px;">ACCESO DENEGADO</h1>
+        <p style="color: #eee; margin-bottom: 20px;">SISTEMA: No detecto una sesión activa en tu terminal.</p>
+        <button class="btn-neon" onclick="window.location.href='index.html'">VOLVER A LA BASE</button>
+    </div>
+
+    <div id="loader">
+        <div class="robot-3d-container">
+            <img src="img/robot.png" alt="Robot" class="robot-img">
+        </div>
+        <div class="loader-text">SINCRONIZANDO CON LA RED...</div>
+    </div>
+
+    <nav>
+        <h1>ARCADE EXPERIENCE</h1>
+        <div>
+            <a href="#games">JUEGOS</a>
+            <a href="#contact">REPORTE</a>
+            <a href="index.html" style="color:#ff00ff">SALIR</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h2 id="welcome-user">HOLA, JUGADOR</h2>
+        <p>Selecciona un módulo de entretenimiento</p>
+        <br>
+        <button class="btn-neon" onclick="openRandomGame()">MÓDULO AL AZAR</button>
+    </section>
+
+    <section id="games" class="games">
+        <div class="card" onclick="openWindow('snake')">
+            <h3>SNAKE</h3>
+            <p>Protocolo de crecimiento infinito</p>
+        </div>
+        <div class="card" onclick="openWindow('dodge')">
+            <h3>DODGE</h3>
+            <p>Simulación de evasión de riesgos</p>
+        </div>
+        <div class="card" onclick="openWindow('jump')">
+            <h3>JUMP</h3>
+            <p>Prueba de altitud máxima</p>
+        </div>
+        <div class="card" onclick="openWindow('bouncing')">
+            <h3>REBOTE</h3>
+            <p>Destrucción de barreras físicas</p>
+        </div>
+    </section>
+
+    <section id="contact" class="contact" style="padding: 60px 20px; text-align: center; background: #070707;">
+        <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
+        <form action="https://formsubmit.co/naomibaturaro@hotmail.com" method="POST" style="max-width: 500px; margin: 20px auto;">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
+            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
+            <textarea name="report" placeholder="DESCRIBE LA ANOMALÍA" rows="4" required></textarea>
+            <button type="submit" class="btn-neon" style="width: 100%;">ENVIAR DATA</button>
+        </form>
+    </section>
+
+    <div id="gameWindow" class="window">
+        <div class="window-header">
+            <span id="gameTitle" style="color:#0ff; font-size:0.8rem">SISTEMA LISTO</span>
+            <button onclick="closeWindow()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-family:'Orbitron'">[X]</button>
+        </div>
+        <div class="window-content" style="padding: 10px;">
+            <div id="overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content:center; align-items:center; z-index: 10;">
+                <h2 style="color:#f0f; margin-bottom:10px">MISIÓN FALLIDA</h2>
+                <p id="finalScore" style="margin-bottom:15px">PUNTAJE: 0</p>
+                <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
+            </div>
+            <button id="startBtn" class="btn-neon" style="width:100%; margin-bottom:10px" onclick="initGame()">INICIAR MÓDULO</button>
+            <canvas id="gameCanvas" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="chat-btn" onclick="toggleChat()">🤖</div>
+    <div id="chat-container">
+        <div style="background:#111; padding:10px; display:flex; justify-content:space-between; border-bottom:1px solid #0ff;">
+            <span style="font-size:0.7rem; color:#0ff;">SISTEMA DE ASISTENCIA</span>
+            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer;">[X]</button>
+        </div>
+        <div id="chat-messages" style="flex-grow:1; padding:10px; overflow-y:auto; font-size:0.8rem;">
+            <div style="background:#222; padding:8px; border-radius:5px; border-left:3px solid #0ff; margin-bottom:10px;">
+                Hola. Soy el asistente de Arcade Experience. Elige una opción.
+            </div>
+            <div class="user-option" style="border:1px solid #0ff; padding:5px; margin-top:5px; cursor:pointer; text-align:center;" onclick="openRandomGame()">Juego al azar</div>
+        </div>
+    </div>
+
+    <script src="script-arcade.js"></script>
+</body>
+</html>

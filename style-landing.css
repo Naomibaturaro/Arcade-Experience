@@ -1,0 +1,218 @@
+﻿/* ===== VARIABLES ===== */
+:root{
+  --bg:#f5efe6;
+  --text:#222;
+  --card:#ffffff;
+  --primary:#00bcd4;
+  --accent:#ff4081;
+}
+
+body.dark{
+  --bg:#070707;
+  --text:#fff;
+  --card:#111;
+  --primary:#0ff;
+  --accent:#ff00ff;
+}
+
+/* ===== BASE ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Orbitron',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  transition:0.4s;
+}
+
+/* ===== LOADER & ROBOT 3D ===== */
+#loader{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+.robot-3d-container {
+  perspective: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.robot-img {
+  width: 150px;
+  height: auto;
+  filter: drop-shadow(0 0 15px var(--primary));
+  animation: float3D 4s infinite ease-in-out;
+
+  transform-style: preserve-3d;
+  border: none;
+
+  background: transparent;
+}
+
+@keyframes float3D {
+  0% { transform: translateY(0px) rotateX(0deg) rotateY(-10deg); }
+  50% { transform: translateY(-20px) rotateX(10deg) rotateY(10deg); }
+  100% { transform: translateY(0px) rotateX(0deg) rotateY(-10deg); }
+}
+
+.loader-text{
+  font-size:0.8rem;
+  color:var(--primary);
+  animation:blink 1s infinite;
+}
+@keyframes blink{50%{opacity:0.3}}
+
+/* ===== NAV ===== */
+nav{
+  display:flex;
+  justify-content:space-between;
+  align-items: center;
+  padding:15px 20px;
+  background:var(--card);
+  border-bottom:2px solid var(--primary);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav a{
+  color:var(--text);
+  margin-left:15px;
+  text-decoration:none;
+  font-size:0.7rem;
+  font-weight:700;
+}
+
+.toggle{
+  cursor:pointer;
+  margin-left:10px;
+  font-size:1.2rem;
+}
+
+/* ===== HERO ===== */
+.hero{
+  height:70vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding: 20px;
+}
+
+.hero h1{
+  font-size:2.5rem;
+  font-weight:900;
+  color:var(--primary);
+  margin-bottom:15px;
+  animation:fadeUp 1s ease;
+  text-shadow: 0 0 10px var(--primary);
+}
+
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(20px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* ===== SECCIONES & CARDS ===== */
+.section{
+  padding:60px 20px;
+  text-align:center;
+}
+
+h2{ font-weight:900; margin-bottom:20px; color: var(--primary); }
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+  margin-top:30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--primary);
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-10px);
+  box-shadow: 0 0 20px var(--primary);
+}
+
+.img-box{
+  width:100%;
+  height:200px;
+  background:#222;
+  margin-bottom:15px;
+  border-radius:8px;
+  overflow: hidden;
+}
+
+/* ===== BOTONES ===== */
+.btn{
+  background:var(--accent);
+  border:none;
+  padding:12px 25px;
+  color:#fff;
+  cursor:pointer;
+  border-radius:6px;
+  box-shadow:0 0 10px var(--accent);
+  font-weight:700;
+  transition:0.3s;
+  font-family: 'Orbitron';
+  margin: 10px;
+}
+.btn:hover{ transform:scale(1.1); box-shadow: 0 0 20px var(--accent); }
+
+/* ===== CONTACTO ===== */
+input,textarea{
+  width:100%;
+  max-width:450px;
+  margin:10px auto;
+  padding:15px;
+  background:var(--card);
+  border:1px solid var(--primary);
+  color:var(--text);
+  display:block;
+  border-radius:8px;
+  font-family: 'Orbitron';
+}
+
+/* MODAL ROBOT */
+#robot-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  display: none; justify-content: center; align-items: center; z-index: 10000;
+}
+.robot-box {
+  background: var(--card); border: 2px solid var(--primary);
+  padding: 30px; width: 90%; max-width: 400px; text-align: center;
+  box-shadow: 0 0 30px var(--primary);
+  border-radius: 20px;
+}
+#robot-msg { margin-bottom: 20px; font-size: 0.9rem; min-height: 40px; line-height: 1.5; }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .hero h1{ font-size:1.6rem; }
+  nav{ padding: 10px; }
+  nav div:first-child { font-size: 0.8rem; }
+  nav a { margin-left: 8px; font-size: 0.6rem; }
+  .cards { grid-template-columns: 1fr; }
+  .robot-img { width: 120px; }
+}

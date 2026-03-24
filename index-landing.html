@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Experience</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style-landing.css">
+</head>
+<body>
+
+    <div id="loader">
+        <div class="robot-3d-container">
+            <img src="img/robot.png" alt="Robot Arcade" class="robot-img">
+        </div>
+        <p class="loader-text">INICIANDO SISTEMA ARCADE...</p>
+    </div>
+
+    <nav>
+        <div style="font-weight: 900; letter-spacing: 2px; color: var(--primary);">ARCADE EXPERIENCE</div>
+        <div>
+            <a href="#arcade">ARCADE</a>
+            <a href="#about">QUIENES SOMOS</a>
+            <a href="#world">NUESTRO MUNDO</a>
+            <a href="#contact">CONTACTO</a>
+            <span class="toggle" onclick="toggleMode()">🌙</span>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>BIENVENIDOS A ARCADE EXPERIENCE</h1>
+        <button class="btn" onclick="showRobot('login')">INGRESAR AL SISTEMA</button>
+    </section>
+
+    <section id="arcade" class="section">
+        <h2>ARCADE</h2>
+        <p>Probá nuestros juegos interactivos</p>
+        <br>
+        <button class="btn" onclick="showRobot('arcade')">PROBAR JUEGOS</button>
+    </section>
+
+    <section id="about" class="section">
+        <h2>QUIENES SOMOS</h2>
+        <p>Arcade Experience es un espacio pensado para que chicos y grandes vuelvan a disfrutar la magia del juego.</p>
+
+        <div class="cards">
+            <div class="card">
+                <div class="img-box">
+                    <img src="img/ambientefamiliar.jpeg" alt="Ambiente Familiar" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p>Ambiente familiar</p>
+            </div>
+
+            <div class="card">
+                <div class="img-box">
+                    <img src="img/juegos.jpg" alt="Juegos Accesibles" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p>Juegos accesibles para todos</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="world" class="section">
+        <h2>NUESTRO MUNDO</h2>
+        <div class="cards">
+            <div class="card">
+                <div class="img-box">
+                    <img src="img/zonaarcade.jpg" alt="Zona Arcade" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p>Zona Arcade</p>
+            </div>
+
+            <div class="card">
+                <div class="img-box">
+                    <img src="img/zonaretro.jpg" alt="Zona Retro" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p>Zona Retro</p>
+            </div>
+
+            <div class="card">
+                <div class="img-box">
+                    <img src="img/zonafamiliar1.jpeg" alt="Zona Familiar" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p>Zona Familiar</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <h2>CONTACTO</h2>
+        <p style="margin-bottom: 20px; color: var(--text);">¿Tenés alguna duda o querés visitarnos? Escribinos.</p>
+        
+        <form action="https://formsubmit.co/naomibaturaro@hotmail.com" method="POST">
+            <input type="hidden" name="_subject" value="Nueva consulta desde la Landing Arcade">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+
+            <input type="text" name="name" placeholder="Tu Nombre" required>
+            <input type="email" name="email" placeholder="Tu Email" required>
+            <textarea name="message" placeholder="Tu Mensaje" rows="4" required></textarea>
+            
+            <button type="submit" class="btn">ENVIAR CONSULTA</button>
+        </form>
+    </section>
+
+    <div id="robot-modal">
+        <div class="robot-box">
+            <div class="robot-3d-container">
+                <img src="img/robot.png" alt="Asistente" class="robot-img" style="width: 100px; border-radius: 50%;">
+            </div>
+            <div id="robot-msg">Iniciando sistema...</div>
+
+            <div id="login-fields">
+                <input type="text" id="user-input" placeholder="USUARIO">
+                <button class="btn" onclick="processLogin()">LOGUEAR</button>
+            </div>
+
+            <button id="close-robot" class="btn" style="display:none" onclick="hideRobot()">
+                CONTINUAR
+            </button>
+        </div>
+    </div>
+
+    <audio id="bootSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-game-notification-212.wav"></audio>
+    <audio id="accessSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.wav"></audio>
+
+    <script src="script-landing.js"></script>
+</body>
+</html>
