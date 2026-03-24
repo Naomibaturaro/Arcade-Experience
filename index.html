@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -92,7 +92,7 @@
         <h2>CONTACTO</h2>
         <p style="margin-bottom: 20px; color: var(--text);">¿Tenés alguna duda o querés visitarnos? Escribinos.</p>
         
-        <form action="https://formsubmit.co/naomibaturaro@hotmail.com" method="POST">
+        <form action="https://formsubmit.co/ajax/naomibaturaro@hotmail.com" method="POST">
             <input type="hidden" name="_subject" value="Nueva consulta desde la Landing Arcade">
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
@@ -122,6 +122,14 @@
             </button>
         </div>
     </div>
+<div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div class="robot-3d-container">
+        <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
+    </div>
+    <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
+    <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
+    <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
+</div>
 
     <audio id="bootSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-game-notification-212.wav"></audio>
     <audio id="accessSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.wav"></audio>
@@ -129,3 +137,4 @@
     <script src="script-landing.js"></script>
 </body>
 </html>
+
