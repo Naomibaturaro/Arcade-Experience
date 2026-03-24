@@ -1,13 +1,21 @@
 /* --- ESTILOS GLOBALES Y RESET --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body {
+    /* Crucial para que el touch global no mueva la pantalla de fondo */
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    position: fixed; 
+    touch-action: none; 
+}
+
 body {
     font-family: 'Orbitron', sans-serif;
     background: #050505;
     color: #fff;
     overflow-x: hidden;
     scroll-behavior: smooth;
-    /* Evita el bounce effect en iOS y overscroll en Android */
     overscroll-behavior-y: contain;
 }
 
@@ -102,7 +110,7 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     background: #000; border: 2px solid #ff00ff;
     width: 100%; height: auto; display: block;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
-    /* CRÍTICO: Evita que el navegador use gestos táctiles propios sobre el juego */
+    /* Desactiva gestos nativos para que no interfieran con el JS */
     touch-action: none; 
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -135,17 +143,6 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     -webkit-tap-highlight-color: transparent;
 }
 
-.chat-btn:hover { 
-    transform: scale(1.1); 
-    filter: drop-shadow(0 0 20px #0ff);
-}
-
-.chat-robot-img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
 /* --- CONTENEDOR DEL CHAT --- */
 #chat-container {
     position: fixed;
@@ -163,16 +160,13 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     overflow: hidden;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
+    /* Permitimos scroll solo dentro del chat */
+    touch-action: auto; 
 }
 
 #chat-container.active {
     display: flex;
     animation: chatSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-@keyframes chatSlideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .user-option {
@@ -188,21 +182,6 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     -webkit-tap-highlight-color: transparent;
 }
 
-.user-option:hover {
-    background: #0ff;
-    color: #000;
-    box-shadow: 0 0 10px #0ff;
-}
-
-.bot-msg {
-    background: #1a1a1a;
-    padding: 10px;
-    border-radius: 10px 10px 10px 0;
-    border-left: 3px solid #0ff;
-    margin-bottom: 5px;
-    line-height: 1.4;
-}
-
 /* --- FORMULARIO Y OTROS --- */
 .contact form {
     display: flex;
@@ -210,6 +189,8 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     gap: 15px;
     max-width: 500px;
     margin: 20px auto;
+    /* Permitimos touch en formulario */
+    touch-action: auto; 
 }
 
 .contact input, .contact textarea {
@@ -224,18 +205,11 @@ nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
     transition: 0.3s;
 }
 
-.contact input:focus, .contact textarea:focus {
-    box-shadow: 0 0 10px #0ff;
-    border-color: #fff;
-}
-
 #success-overlay, #denied-overlay {
     position: fixed; inset: 0; z-index: 30000; 
     display: none; flex-direction: column; justify-content: center; align-items: center; 
     text-align: center; padding: 20px;
 }
-#success-overlay { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(5px); }
-#denied-overlay { background: #000; }
 
 /* RESPONSIVO PARA MÓVILES */
 @media (max-width: 600px) {
