@@ -43,7 +43,7 @@ function showRobot(action) {
 
         if (pendingAction === 'arcade') {
             setTimeout(() => {
-                window.location.href = 'arcade.html';
+                window.location.href = 'index-arcade.html';
             }, 1200);
         }
     } else {
@@ -81,6 +81,6 @@ function processLogin() {
 function hideRobot() {
     robotModal.style.display = 'none';
     if (pendingAction === 'arcade') {
-        window.location.href = 'arcade.html';
+        window.location.href = 'index-arcade.html';
     }
 }
