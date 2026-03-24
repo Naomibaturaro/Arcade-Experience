@@ -1,157 +1,177 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arcade Experience | Neon Edition</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style-arcade.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade Experience | Neon Edition</title>
 
-    <style>
-        /* Ajustes críticos para jugabilidad en móvil y control global */
-        canvas {
-            touch-action: none; 
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-            height: auto;
-            border: 2px solid #ff00ff;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
-        }
-        
-        .window-content {
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-arcade.css">
 
-        /* Evita que el navegador interprete gestos de "atrás/adelante" al deslizar */
-        body {
-            overscroll-behavior: none;
-        }
+<style>
+canvas {
+    touch-action: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
 
-        #gameWindow {
-            width: 95vw;
-            max-width: 420px;
-        }
-    </style>
+body {
+    overscroll-behavior: none;
+}
+
+#gameWindow {
+    width: 95vw;
+    max-width: 420px;
+}
+</style>
 </head>
+
 <body>
 
-    <div id="denied-overlay">
-        <div class="robot-3d-container">
-            <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #ff0044);">
-        </div>
-        <h1 style="color: #ff0044; font-size: 2rem; margin-bottom: 10px;">ACCESO DENEGADO</h1>
-        <p style="color: #eee; margin-bottom: 20px;">SISTEMA: No detecto una sesión activa en tu terminal.</p>
-        <button class="btn-neon" onclick="window.location.href='index.html'">VOLVER A LA BASE</button>
+<!-- 🔴 ACCESO DENEGADO -->
+<div id="denied-overlay">
+    <div class="robot-3d-container">
+        <img src="img/robot.png" class="robot-img" style="filter: drop-shadow(0 0 15px red);">
+    </div>
+    <h1>ACCESO DENEGADO</h1>
+    <p>SISTEMA: No se detectó sesión activa</p>
+    <button class="btn-neon" onclick="window.location.href='index.html'">VOLVER</button>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+    <div class="robot-3d-container">
+        <img src="img/robot.png" class="robot-img">
+    </div>
+    <div class="loader-text">SINCRONIZANDO...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+    <h1>ARCADE EXPERIENCE</h1>
+    <div>
+        <a href="#games">JUEGOS</a>
+        <a href="#contact">REPORTE</a>
+        <a href="index.html" style="color:#ff00ff">SALIR</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <h2 id="welcome-user">HOLA, JUGADOR</h2>
+    <p>Selecciona un módulo</p>
+    <br>
+    <button class="btn-neon" onclick="openRandomGame()">MÓDULO AL AZAR</button>
+</section>
+
+<!-- JUEGOS -->
+<section id="games" class="games">
+    <div class="card" onclick="openWindow('snake')"><h3>SNAKE</h3></div>
+    <div class="card" onclick="openWindow('dodge')"><h3>DODGE</h3></div>
+    <div class="card" onclick="openWindow('jump')"><h3>JUMP</h3></div>
+    <div class="card" onclick="openWindow('bouncing')"><h3>REBOTE</h3></div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contact" class="contact" style="padding:60px 20px;text-align:center;background:#070707;">
+    <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
+
+    <form id="contact-form" action="https://formsubmit.co/ajax/naomibaturaro@hotmail.com" method="POST" style="max-width:500px;margin:20px auto;">
+        <input type="hidden" name="_captcha" value="false">
+
+        <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
+        <input type="email" name="email" placeholder="EMAIL" required>
+        <textarea name="message" placeholder="DESCRIBE LA ANOMALÍA" required></textarea>
+
+        <button class="btn-neon" type="submit">ENVIAR</button>
+    </form>
+</section>
+
+<!-- VENTANA JUEGO -->
+<div id="gameWindow" class="window">
+    <div class="window-header">
+        <span id="gameTitle">SISTEMA</span>
+        <button onclick="closeWindow()">X</button>
     </div>
 
-    <div id="loader">
-        <div class="robot-3d-container">
-            <img src="img/robot.png" alt="Robot" class="robot-img">
+    <div class="window-content">
+        <div id="overlay">
+            <h2>GAME OVER</h2>
+            <p id="finalScore">0</p>
+            <button onclick="restartCurrentGame()">REINTENTAR</button>
         </div>
-        <div class="loader-text">SINCRONIZANDO CON LA RED...</div>
+
+        <button id="startBtn" onclick="initGame()">INICIAR</button>
+        <canvas id="gameCanvas" width="400" height="300"></canvas>
+    </div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-btn" onclick="toggleChat()">
+    <img src="img/robot.png" class="chat-robot-img">
+</div>
+
+<div id="chat-container">
+    <div>
+        <span>SISTEMA</span>
+        <button onclick="toggleChat()">X</button>
     </div>
 
-    <nav>
-        <h1>ARCADE EXPERIENCE</h1>
-        <div>
-            <a href="#games">JUEGOS</a>
-            <a href="#contact">REPORTE</a>
-            <a href="index.html" style="color:#ff00ff">SALIR</a>
-        </div>
-    </nav>
+    <div id="chat-messages">
+        <div>Hola, soy el asistente</div>
 
-    <section class="hero">
-        <h2 id="welcome-user">HOLA, JUGADOR</h2>
-        <p>Selecciona un módulo de entretenimiento</p>
-        <br>
-        <button class="btn-neon" onclick="openRandomGame()">MÓDULO AL AZAR</button>
-    </section>
-
-    <section id="games" class="games">
-        <div class="card" onclick="openWindow('snake')">
-            <h3>SNAKE</h3>
-            <p>Protocolo de crecimiento infinito</p>
-        </div>
-        <div class="card" onclick="openWindow('dodge')">
-            <h3>DODGE</h3>
-            <p>Simulación de evasión de riesgos</p>
-        </div>
-        <div class="card" onclick="openWindow('jump')">
-            <h3>JUMP</h3>
-            <p>Prueba de altitud máxima</p>
-        </div>
-        <div class="card" onclick="openWindow('bouncing')">
-            <h3>REBOTE</h3>
-            <p>Destrucción de barreras físicas</p>
-        </div>
-    </section>
-
-    <section id="contact" class="contact" style="padding: 60px 20px; text-align: center; background: #070707;">
-        <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
-        <form action="https://formsubmit.co/ajax/naomibaturaro@hotmail.com" method="POST" style="max-width: 500px; margin: 20px auto;">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
-            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
-            <textarea name="report" placeholder="DESCRIBE LA ANOMALÍA" rows="4" required></textarea>
-            <button type="submit" class="btn-neon" style="width: 100%;">ENVIAR DATA</button>
-        </form>
-    </section>
-
-    <div id="gameWindow" class="window">
-        <div class="window-header">
-            <span id="gameTitle" style="color:#0ff; font-size:0.8rem">SISTEMA LISTO</span>
-            <button onclick="closeWindow()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-family:'Orbitron'">[X]</button>
-        </div>
-        <div class="window-content" style="padding: 10px;">
-            <div id="overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content:center; align-items:center; z-index: 10;">
-                <h2 style="color:#f0f; margin-bottom:10px">MISIÓN FALLIDA</h2>
-                <p id="finalScore" style="margin-bottom:15px">PUNTAJE: 0</p>
-                <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
-            </div>
-            <button id="startBtn" class="btn-neon" style="width:100%; margin-bottom:10px" onclick="initGame()">INICIAR MÓDULO</button>
-            <canvas id="gameCanvas" width="400" height="300"></canvas>
-        </div>
+        <div onclick="openRandomGame()">🎮 Juego</div>
+        <div onclick="chatLogic('juegos')">💡 Sugerencia</div>
+        <div onclick="chatLogic('error')">⚠️ Error</div>
     </div>
+</div>
 
-    <div class="chat-btn" onclick="toggleChat()">
-        <img src="img/robot.png" alt="Asistente Robot" class="chat-robot-img">
-    </div>
+<!-- SUCCESS -->
+<div id="success-overlay" style="position:fixed;inset:0;background:#000;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:30000;">
+    <h1 style="color:#0ff">MENSAJE ENVIADO</h1>
+    <button onclick="this.parentElement.style.display='none'">OK</button>
+</div>
 
-    <div id="chat-container">
-        <div style="background:#111; padding:12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #0ff;">
-            <span style="font-size:0.7rem; color:#0ff; font-weight:bold;">SISTEMA DE ASISTENCIA</span>
-            <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer; font-size:1rem;">[X]</button>
-        </div>
-        <div id="chat-messages" style="flex-grow:1; padding:15px; overflow-y:auto; font-size:0.8rem; display:flex; flex-direction:column; gap:10px;">
-            <div style="background:#222; padding:10px; border-radius:10px 10px 10px 0; border-left:3px solid #0ff;">
-                Hola. Soy el asistente de Arcade Experience. ¿En qué módulo puedo ayudarte?
-            </div>
-            
-            <div class="user-option" onclick="openRandomGame()">🎮 JUEGO AL AZAR</div>
-            <div class="user-option" onclick="chatLogic('juegos')">🔍 SUGERIRME UN JUEGO</div>
-            <div class="user-option" onclick="chatLogic('error')">⚠️ REPORTAR ANOMALÍA</div>
-        </div>
-    </div>
+<script src="script-arcade.js"></script>
 
-    <div id="success-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 30000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        <div class="robot-3d-container">
-            <img src="img/robot.png" alt="Robot" class="robot-img" style="filter: drop-shadow(0 0 15px #0ff);">
-        </div>
-        <h1 style="color: #0ff; font-size: 2rem; margin-bottom: 10px;">¡DATA RECIBIDA!</h1>
-        <p style="color: #eee; margin-bottom: 20px;">SISTEMA: La anomalía ha sido registrada con éxito.</p>
-        <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
-    </div>
+<script>
+// 🔐 VALIDACIÓN DE ACCESO
+window.onload = () => {
 
-    <script src="script-arcade.js"></script>
+    setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+    }, 1000);
+
+    const session = sessionStorage.getItem('sessionActive');
+    const local = localStorage.getItem('arcade_system');
+
+    if (!session && !local) {
+        document.getElementById("denied-overlay").style.display = "flex";
+        return;
+    }
+};
+
+// 📩 FORM AJAX + OVERLAY
+document.getElementById("contact-form").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const form = e.target;
+
+    fetch(form.action, {
+        method: "POST",
+        body: new FormData(form)
+    })
+    .then(() => {
+        document.getElementById("success-overlay").style.display = "flex";
+        form.reset();
+    })
+    .catch(() => alert("Error al enviar"));
+});
+</script>
+
 </body>
 </html>
