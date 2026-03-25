@@ -19,6 +19,7 @@ window.onload = () => {
     }, 1500);
 };
 
+
 // 2. VARIABLES DE ESTADO GLOBALES
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchX = null, touchY = null;
@@ -76,22 +77,77 @@ function chatLogic(op) {
     msgs.scrollTop = msgs.scrollHeight;
 }
 
-// Eventos de Touch
-document.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
-document.addEventListener("touchmove", (e) => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
-document.addEventListener("touchend", () => { touchX = null; touchY = null; });
 
+// 🔒 BLOQUEO TOTAL DE INPUT CUANDO HAY JUEGO
+function blockBackgroundInteraction(enable){
+    const body = document.body;
+
+    if(enable){
+        body.classList.add("game-active");
+
+        document.addEventListener("touchmove", preventScroll, { passive: false });
+        document.addEventListener("wheel", preventScroll, { passive: false });
+    } else {
+        body.classList.remove("game-active");
+
+        document.removeEventListener("touchmove", preventScroll);
+        document.removeEventListener("wheel", preventScroll);
+    }
+}
+
+function preventScroll(e){
+    const gameWindow = document.getElementById("gameWindow");
+    if(gameWindow && gameWindow.classList.contains("active")){
+        e.preventDefault();
+    }
+}
+
+// Eventos de Touch
+document.addEventListener("touchstart", (e) => {
+    if(document.body.classList.contains("game-active")){
+        e.preventDefault();
+    }
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: false });
+
+document.addEventListener("touchmove", (e) => {
+    if(document.body.classList.contains("game-active")){
+        e.preventDefault();
+    }
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+}, { passive: false });
 /// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
 function openWindow(game) {
     stopGame(); 
     currentGame = game;
+    setupTouchControls();
+
     const win = document.getElementById("gameWindow");
     const title = document.getElementById("gameTitle");
     const btn = document.getElementById("startBtn");
     const overlay = document.getElementById("overlay");
     const canvas = document.getElementById("gameCanvas");
 
-    if(win) win.classList.add("active");
+    // 🔥 ACTIVAR BLOQUEO TOTAL
+    blockBackgroundInteraction(true);
+
+    if(win){
+        win.classList.remove("closing");
+        win.classList.add("active");
+    }
+
+    // 🔊 SONIDO
+    const openSound = document.getElementById("openSound");
+if (openSound) {
+    openSound.currentTime = 0;
+    openSound.play().catch(()=>{});
+}
+
+    // 📳 Vibración
+    if (navigator.vibrate) navigator.vibrate(40);
+
     if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
     if(overlay) overlay.style.display = "none";
     if(btn) btn.style.display = "block";
@@ -101,14 +157,6 @@ function openWindow(game) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
-
-function stopGame() { 
-    gameActive = false; 
-    if (animationId) cancelAnimationFrame(animationId); 
-    if (window.gameInterval) clearInterval(window.gameInterval);
-    document.onkeydown = null; 
-}
-
 // ESTA FUNCIÓN DEBE ESTAR AFUERA
 function restartCurrentGame() {
     const overlay = document.getElementById("overlay");
@@ -131,6 +179,76 @@ function initGame() {
     else if(currentGame === 'dodge') startDodge();
     else if(currentGame === 'pacman') startPacMan();
 }
+
+
+function closeGameWindow() {
+    const win = document.getElementById("gameWindow");
+
+    if(win){
+        const closeSound = document.getElementById("closeSound");
+if (closeSound) {
+    closeSound.currentTime = 0;
+    closeSound.play().catch(()=>{});
+}
+
+        if (navigator.vibrate) navigator.vibrate(30);
+
+        win.classList.add("closing");
+
+        setTimeout(() => {
+            win.classList.remove("active", "closing");
+
+            // 🔥 DESBLOQUEAR FONDO
+            blockBackgroundInteraction(false);
+
+            stopGame();
+        }, 300);
+    }
+}
+    function gameOver(score){
+    const overlay = document.getElementById("overlay");
+
+    if(overlay){
+        overlay.style.display = "flex";
+        overlay.innerHTML = `
+            <div class="gameover-box">
+                <h2>GAME OVER</h2>
+                <p>PUNTAJE: ${score}</p>
+                <button onclick="restartCurrentGame()">REINTENTAR</button>
+            </div>
+        `;
+    }
+
+    const closeSound = document.getElementById("closeSound");
+if (closeSound) {
+    closeSound.currentTime = 0;
+    closeSound.play().catch(()=>{});
+}
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+    stopGame();
+}
+
+
+let touchDir = null;
+
+function setupTouchControls(){
+    const buttons = document.querySelectorAll("#touchControls button");
+
+    buttons.forEach(btn => {
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            touchDir = btn.dataset.dir;
+            if (navigator.vibrate) navigator.vibrate(10);
+        });
+
+        btn.addEventListener("touchend", () => {
+            touchDir = null;
+        });
+    });
+}
+
 // ================= JUEGOS CORREGIDOS =================
 
 function startPacMan() {
@@ -162,18 +280,26 @@ function startPacMan() {
     ];
 
     document.onkeydown = (e) => {
-        if(e.key === "ArrowLeft") dir={x:-speed, y:0};
-        else if(e.key === "ArrowRight") dir={x:speed, y:0};
-        else if(e.key === "ArrowUp") dir={x:0, y:-speed};
-        else if(e.key === "ArrowDown") dir={x:0, y:speed};
-    };
+    if(e.key === "ArrowLeft") dir={x:-speed, y:0};
+    else if(e.key === "ArrowRight") dir={x:speed, y:0};
+    else if(e.key === "ArrowUp") dir={x:0, y:-speed};
+    else if(e.key === "ArrowDown") dir={x:0, y:speed};
+};
 
+    
     function loop() {
         if(!gameActive) return;
         
         // Movimiento con colisiones relativas al offsetY
         let nextX = px + dir.x;
         let nextY = py + dir.y;
+
+        // 👇 TOUCH
+        if(touchDir === "left") dir={x:-speed, y:0};
+        if(touchDir === "right") dir={x:speed, y:0};
+        if(touchDir === "up") dir={x:0, y:-speed};
+        if(touchDir === "down") dir={x:0, y:speed};
+
         
         // Ajustamos el cálculo de colisión restando el offset
         let col = Math.floor((nextX - offsetX + grid/2) / grid);
@@ -250,8 +376,8 @@ function startBreakout() {
 
     function loop() {
         if(!gameActive) return;
-        if(keys.ArrowLeft && paddleX > 0) paddleX -= 6;
-        if(keys.ArrowRight && paddleX < 320) paddleX += 6;
+        if((keys.ArrowLeft || touchDir === "left") && paddleX > 0) paddleX -= 6;
+        if((keys.ArrowRight || touchDir === "right") && paddleX < 320) paddleX += 6;
 
         ballX += ballDX; ballY += ballDY;
         if(ballX<0 || ballX>390) ballDX *= -1;
@@ -297,7 +423,10 @@ function startSnake() {
     function loop(time) {
         if (!gameActive) return;
         animationId = requestAnimationFrame(loop);
-        
+        if(touchDir === "up" && dy === 0){ dx=0; dy=-20; }
+        if(touchDir === "down" && dy === 0){ dx=0; dy=20; }
+        if(touchDir === "left" && dx === 0){ dx=-20; dy=0; }
+        if(touchDir === "right" && dx === 0){ dx=20; dy=0; }
         // Control de velocidad (100ms es una velocidad arcade clásica)
         if (time - lastUpdate < 100) return;
         lastUpdate = time;
@@ -362,8 +491,8 @@ function startDodge() {
 
     function loop() {
         if (!gameActive) return;
-        if (keys["ArrowLeft"] && px > 0) px -= 7; if (keys["ArrowRight"] && px < 380) px += 7;
-        
+        if ((keys["ArrowLeft"] || touchDir === "left") && px > 0) px -= 7;
+        if ((keys["ArrowRight"] || touchDir === "right") && px < 380) px += 7;
         ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; ctx.fillRect(0, 0, 400, 300);
         ctx.fillStyle = "#0ff"; ctx.fillRect(px, 270, 20, 20);
 
@@ -376,4 +505,30 @@ function startDodge() {
         animationId = requestAnimationFrame(loop);
     }
     loop();
+}
+
+function setupTouchControls(){
+    const container = document.getElementById("touchControls");
+    if(!container) return; // 👈 evita error
+
+    const buttons = container.querySelectorAll("button");
+
+    buttons.forEach(btn => {
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            touchDir = btn.dataset.dir;
+            if (navigator.vibrate) navigator.vibrate(10);
+        });
+
+        btn.addEventListener("touchend", () => {
+            touchDir = null;
+        });
+    });
+}
+
+function stopGame(){
+    gameActive = false;
+
+    if(animationId) cancelAnimationFrame(animationId);
+    if(window.gameInterval) clearInterval(window.gameInterval);
 }
