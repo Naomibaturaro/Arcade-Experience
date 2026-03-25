@@ -22,23 +22,7 @@ body {
     transition: filter 0.3s ease;
 }
 
-/* --- BLOQUEO DE PANTALLA (MODO ARCADE ACTIVO) --- 
-*/
-body.locked {
-    overflow: hidden;
-    touch-action: none;
-}
 
-/* Overlay de oscuridad y blur dinámico tras el juego */
-body.locked::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(12px) brightness(0.4);
-    z-index: 9999; /* Debajo de gameWindow, encima del resto */
-    animation: fadeIn 0.4s ease forwards;
-}
 
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -114,109 +98,7 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
 .card { background: rgba(17, 17, 17, 0.9); padding: 30px; border: 1px solid var(--neon-cyan); transition: 0.4s; cursor: pointer; text-align: center; border-radius: 10px; }
 .card:hover { transform: translateY(-10px); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); border-color: var(--neon-pink); }
 
-/* --- VENTANA DE JUEGO PRO (ARCADE) --- 
-*/
-#gameWindow {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000000; /* Siempre arriba de todo */
-    opacity: 0;
-    pointer-events: none;
-    perspective: 1200px;
-}
-
-#gameWindow.active {
-    pointer-events: auto;
-    animation: arcadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes arcadeIn {
-    0% { transform: scale(0.5) rotateX(-30deg); opacity: 0; }
-    100% { transform: scale(1) rotateX(0); opacity: 1; }
-}
-
-#gameWindow.closing {
-    animation: arcadeOut 0.3s ease-in forwards;
-}
-
-@keyframes arcadeOut {
-    to { transform: scale(0.8) translateY(50px); opacity: 0; }
-}
-
-.canvas-container {
-    position: relative;
-    width: 90vw;
-    max-width: 500px;
-    background: #000;
-    border: 3px solid var(--neon-pink);
-    box-shadow: 0 0 40px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-canvas {
-  touch-action: none;
-}
-
-#gameCanvas {
-    width: 100%;
-    height: auto;
-    display: block;
-    image-rendering: pixelated;
-    touch-action: none;
-}
-
-/* Encabezado del Juego (Botón Salir) */
-.window-header {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 100002;
-}
-
-.close-btn {
-    background: rgba(255, 0, 255, 0.2);
-    border: 1px solid var(--neon-pink);
-    color: #fff;
-    font-family: 'Orbitron';
-    width: 44px; /* Tamaño táctil ideal */
-    height: 44px;
-    cursor: pointer;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 10px var(--neon-pink);
-    transition: 0.3s;
-}
-
-.close-btn:active { transform: scale(0.9); background: var(--neon-pink); }
-
-/* Overlay de Game Over / Reintentar */
-#overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    display: none; /* Se activa con JS */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 100001;
-    text-align: center;
-}
-
-#overlay h2 {
-    color: var(--neon-pink);
-    text-shadow: 0 0 20px var(--neon-pink);
-    margin-bottom: 20px;
-    font-size: 2rem;
-}
-
-/* --- BOTONES NEÓN --- 
-*/
+/* ----- BOTONES NEON ----- */
 .btn-neon { 
     background: var(--neon-pink); color: #fff; border: none; padding: 12px 30px; 
     font-family: 'Orbitron'; cursor: pointer; box-shadow: 0 0 15px var(--neon-pink); 
@@ -254,6 +136,114 @@ canvas {
     #chat-container { width: 90%; right: 5%; height: 50vh; }
 }
 
-body.locked > *:not(#gameWindow) {
+body.game-active > *:not(#gameWindow) {
+    filter: blur(8px) brightness(0.4);
     pointer-events: none;
+    user-select: none;
+}
+
+html, body {
+    overscroll-behavior: none;
+}
+
+/* ✨ ANIMACIONES */
+@keyframes arcadeIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes arcadeOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.7); opacity: 0; }
+}
+
+@keyframes arcadePop {
+    0% {
+        transform: scale(0.5) rotate(-5deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1) rotate(2deg);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#gameWindow.active {
+    animation: arcadePop 0.35s ease;
+}
+
+/* 💀 GAME OVER */
+#overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.gameover-box{
+    text-align:center;
+    color:#0ff;
+}
+
+.gameover-box button{
+    margin-top:10px;
+    padding:10px 20px;
+    background:#0ff;
+    border:none;
+    font-weight:bold;
+}
+
+/* 🔥 FONDO BLOQUEADO REAL */
+body.game-active {
+    overflow: hidden;
+}
+
+/* Capa oscura + blur REAL */
+body.game-active::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 999998;
+}
+
+/* 🎮 GAME WINDOW (UNICO) */
+#gameWindow {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.7);
+}
+
+/* ACTIVO */
+#gameWindow.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+    transition: all 0.3s ease;
+}
+
+/* CIERRE */
+#gameWindow.closing {
+    opacity: 0;
+    transform: scale(0.7);
+}/* 🚫 BLOQUEAR TODO DETRÁS */
+
+
+canvas {
+    touch-action: none;
 }
