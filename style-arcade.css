@@ -1,18 +1,55 @@
-/* --- ESTILOS GLOBALES Y RESET --- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* --- ESTILOS GLOBALES Y RESET --- 
+*/
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; /* Elimina el recuadro azul en móviles */
+}
+
+:root {
+    --neon-cyan: #00ffff;
+    --neon-pink: #ff00ff;
+    --bg-dark: #050505;
+}
 
 body {
     font-family: 'Orbitron', sans-serif;
-    background: #050505;
+    background: var(--bg-dark);
     color: #fff;
     overflow-x: hidden;
     scroll-behavior: smooth;
+    transition: filter 0.3s ease;
 }
 
-/* LOADER CON ROBOT 3D */
+/* --- BLOQUEO DE PANTALLA (MODO ARCADE ACTIVO) --- 
+*/
+body.locked {
+    overflow: hidden;
+    touch-action: none;
+}
+
+/* Overlay de oscuridad y blur dinámico tras el juego */
+body.locked::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px) brightness(0.4);
+    z-index: 9999; /* Debajo de gameWindow, encima del resto */
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- LOADER CON ROBOT 3D --- 
+*/
 #loader { 
     position: fixed; inset: 0; background: #000; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; 
 }
 
 .robot-3d-container {
@@ -26,7 +63,7 @@ body {
 .robot-img {
     width: 150px;
     height: auto;
-    filter: drop-shadow(0 0 15px #0ff);
+    filter: drop-shadow(0 0 15px var(--neon-cyan));
     animation: float3D 4s infinite ease-in-out;
     transform-style: preserve-3d;
 }
@@ -37,10 +74,11 @@ body {
     100% { transform: translateY(0px) rotateX(0deg) rotateY(-10deg); }
 }
 
-.loader-text { color: #0ff; font-size: 1rem; animation: pulse 1s infinite; letter-spacing: 2px; }
+.loader-text { color: var(--neon-cyan); font-size: 1rem; animation: pulse 1s infinite; letter-spacing: 2px; }
 @keyframes pulse { 0%, 100% { opacity: 0.3 } 50% { opacity: 1 } }
 
-/* FONDO ANIMADO NEÓN */
+/* --- FONDO ANIMADO NEÓN (BACKGROUND) --- 
+*/
 body::before {
     content: "";
     position: fixed;
@@ -54,242 +92,168 @@ body::before {
 }
 @keyframes bgMove { from { transform: translate(0, 0) } to { transform: translate(-5%, -5%) } }
 
-/* --- NAVEGACIÓN --- */
+/* --- NAVEGACIÓN --- 
+*/
 nav {
     display: flex; justify-content: space-between; align-items: center;
     padding: 20px 40px; background: #000;
-    border-bottom: 2px solid #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    border-bottom: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     position: sticky; top: 0; z-index: 1000;
 }
-nav h1 { font-size: 1.5rem; letter-spacing: 4px; color: #0ff; text-shadow: 0 0 10px #0ff; }
+nav h1 { font-size: 1.5rem; letter-spacing: 4px; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
 nav div a { color: #fff; margin-left: 30px; text-decoration: none; font-size: 0.8rem; transition: 0.3s; }
-nav div a:hover { color: #0ff; text-shadow: 0 0 5px #0ff; }
+nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); }
 
-/* --- HERO --- */
-.hero {
-    height: 40vh; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; text-align: center;
-}
-.hero h2 { font-size: 3rem; color: #0ff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
-
-/* --- GRID DE JUEGOS --- */
+/* --- GRID DE JUEGOS --- 
+*/
 .games {
     padding: 40px 20px; display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 25px; max-width: 1200px; margin: 0 auto;
 }
-.card { background: rgba(17, 17, 17, 0.9); padding: 30px; border: 1px solid #0ff; transition: 0.4s; cursor: pointer; text-align: center; border-radius: 10px; }
-.card:hover { transform: translateY(-10px); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); border-color: #ff00ff; }
-.card h3 { color: #0ff; margin-bottom: 10px; font-size: 1.2rem; }
+.card { background: rgba(17, 17, 17, 0.9); padding: 30px; border: 1px solid var(--neon-cyan); transition: 0.4s; cursor: pointer; text-align: center; border-radius: 10px; }
+.card:hover { transform: translateY(-10px); box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); border-color: var(--neon-pink); }
 
-/* --- VENTANAS DE JUEGO --- */
-.window {
-    position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    width: 95%; max-width: 500px;
-    background: #000; border: 3px solid #0ff;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 10000; display: flex; flex-direction: column;
-    padding: 10px; border-radius: 15px;
-}
-.window.active { transform: translate(-50%, -50%) scale(1); }
-.window-header { padding: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid #0ff; }
-
-#gameCanvas {
-    background: #000; border: 2px solid #ff00ff;
-    width: 100%; height: auto; display: block;
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
-    touch-action: none;
-}
-
-/* --- BOTONES NEÓN --- */
-.btn-neon { 
-    background: #ff00ff; color: #fff; border: none; padding: 12px 30px; 
-    font-family: 'Orbitron'; cursor: pointer; box-shadow: 0 0 15px #ff00ff; 
-    transition: 0.3s; text-transform: uppercase; font-weight: bold; border-radius: 5px;
-    letter-spacing: 2px;
-}
-.btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff00ff; background: #ff33ff; }
-
-/* --- BOTÓN DEL CHAT (ROBOT FLOTANTE) --- */
-.chat-btn { 
-    position: fixed; 
-    bottom: 20px; 
-    right: 20px; 
-    width: 65px; 
-    height: 65px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer; 
-    filter: drop-shadow(0 0 10px #0ff); 
-    z-index: 999999; 
-    transition: transform 0.3s ease;
-}
-
-.chat-btn:hover { 
-    transform: scale(1.1); 
-    filter: drop-shadow(0 0 20px #0ff);
-}
-
-.chat-robot-img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* --- CONTENEDOR DEL CHAT (ESTILO VENTANA FLOTANTE / TINA) --- */
-#chat-container {
+/* --- VENTANA DE JUEGO PRO (ARCADE) --- 
+*/
+#gameWindow {
     position: fixed;
-    bottom: 95px; /* Por encima del botón del robot */
-    right: 20px;
-    width: 320px;
-    height: 450px;
-    background: rgba(5, 5, 5, 0.9);
-    border: 2px solid #0ff;
-    border-radius: 15px;
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-    display: none; /* Controlado por JS */
-    flex-direction: column;
-    z-index: 999998;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-/* Clase activa para animaciones */
-#chat-container.active {
+    inset: 0;
     display: flex;
-    animation: chatSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000000; /* Siempre arriba de todo */
+    opacity: 0;
+    pointer-events: none;
+    perspective: 1200px;
 }
 
-@keyframes chatSlideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+#gameWindow.active {
+    pointer-events: auto;
+    animation: arcadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Opciones interactivas dentro del chat */
-.user-option {
-    border: 1px solid #0ff;
-    padding: 10px;
-    margin-top: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: 0.3s;
-    font-size: 0.75rem;
-    background: rgba(0, 255, 255, 0.05);
-    border-radius: 5px;
+@keyframes arcadeIn {
+    0% { transform: scale(0.5) rotateX(-30deg); opacity: 0; }
+    100% { transform: scale(1) rotateX(0); opacity: 1; }
 }
 
-.user-option:hover {
-    background: #0ff;
-    color: #000;
-    box-shadow: 0 0 10px #0ff;
+#gameWindow.closing {
+    animation: arcadeOut 0.3s ease-in forwards;
 }
 
-/* Estilo para los mensajes del bot */
-.bot-msg {
-    background: #1a1a1a;
-    padding: 10px;
-    border-radius: 10px 10px 10px 0;
-    border-left: 3px solid #0ff;
-    margin-bottom: 5px;
-    line-height: 1.4;
+@keyframes arcadeOut {
+    to { transform: scale(0.8) translateY(50px); opacity: 0; }
 }
-
-/* --- FORMULARIO Y OTROS --- */
-.contact form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 500px;
-    margin: 20px auto;
-}
-
-.contact input, .contact textarea {
-    background: #111;
-    border: 1px solid #0ff;
-    color: #fff;
-    padding: 12px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    outline: none;
-    transition: 0.3s;
-}
-
-.contact input:focus, .contact textarea:focus {
-    box-shadow: 0 0 10px #0ff;
-    border-color: #fff;
-}
-
-#success-overlay {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 30000; 
-    display: none; flex-direction: column; justify-content: center; align-items: center; 
-    text-align: center; backdrop-filter: blur(5px);
-}
-
-#denied-overlay {
-    position: fixed; inset: 0; background: #000; z-index: 20000;
-    display: none; flex-direction: column; justify-content: center; align-items: center;
-    text-align: center; padding: 20px;
-}
-
-/* RESPONSIVO PARA MÓVILES */
-@media (max-width: 600px) {
-    nav { padding: 15px 20px; flex-direction: column; gap: 10px; }
-    nav h1 { font-size: 1rem; }
-    nav div a { margin-left: 10px; font-size: 0.6rem; }
-    .hero h2 { font-size: 1.8rem; }
-    
-    #chat-container {
-        width: 90%;
-        right: 5%;
-        bottom: 85px;
-        height: 60vh;
-    }
-}
-/* --- AJUSTES DE INTERFAZ DE JUEGO (NUEVO) --- */
 
 .canvas-container {
     position: relative;
-    width: 100%;
-    max-width: 400px; /* Tamaño del canvas */
-    margin: 0 auto;
+    width: 90vw;
+    max-width: 500px;
+    background: #000;
+    border: 3px solid var(--neon-pink);
+    box-shadow: 0 0 40px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
+    border-radius: 10px;
     overflow: hidden;
-    border-radius: 5px;
 }
 
-/* El overlay que aparece DENTRO de la ventana de juego cuando pierdes */
+canvas {
+  touch-action: none;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: pixelated;
+    touch-action: none;
+}
+
+/* Encabezado del Juego (Botón Salir) */
+.window-header {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100002;
+}
+
+.close-btn {
+    background: rgba(255, 0, 255, 0.2);
+    border: 1px solid var(--neon-pink);
+    color: #fff;
+    font-family: 'Orbitron';
+    width: 44px; /* Tamaño táctil ideal */
+    height: 44px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px var(--neon-pink);
+    transition: 0.3s;
+}
+
+.close-btn:active { transform: scale(0.9); background: var(--neon-pink); }
+
+/* Overlay de Game Over / Reintentar */
 #overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.9);
     display: none; /* Se activa con JS */
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    z-index: 100001;
     text-align: center;
-    border: 1px solid #ff00ff;
 }
 
 #overlay h2 {
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff;
-    margin-bottom: 10px;
+    color: var(--neon-pink);
+    text-shadow: 0 0 20px var(--neon-pink);
+    margin-bottom: 20px;
+    font-size: 2rem;
 }
 
-/* Ajuste de scroll para el chat */
-#chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #0ff #111;
+/* --- BOTONES NEÓN --- 
+*/
+.btn-neon { 
+    background: var(--neon-pink); color: #fff; border: none; padding: 12px 30px; 
+    font-family: 'Orbitron'; cursor: pointer; box-shadow: 0 0 15px var(--neon-pink); 
+    transition: 0.3s; text-transform: uppercase; font-weight: bold; border-radius: 5px;
+    letter-spacing: 2px;
+}
+.btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-pink); background: #ff33ff; }
+
+/* --- CHATBOT (ROBOT FLOTANTE) --- 
+*/
+.chat-btn { 
+    position: fixed; bottom: 20px; right: 20px; width: 65px; height: 65px; 
+    display: flex; align-items: center; justify-content: center; cursor: pointer; 
+    filter: drop-shadow(0 0 10px var(--neon-cyan)); z-index: 999; transition: 0.3s;
 }
 
-/* Evitar que el canvas se vea borroso en algunos navegadores */
-#gameCanvas {
-    image-rendering: pixelated;
-    background-color: #000;
+.chat-btn:hover { transform: scale(1.1); filter: drop-shadow(0 0 20px var(--neon-cyan)); }
+
+#chat-container {
+    position: fixed; bottom: 95px; right: 20px; width: 320px; height: 450px;
+    background: rgba(5, 5, 5, 0.95); border: 2px solid var(--neon-cyan);
+    border-radius: 15px; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    display: none; flex-direction: column; z-index: 998;
+    backdrop-filter: blur(10px);
+}
+
+#chat-container.active { display: flex; animation: chatSlideUp 0.4s ease-out; }
+
+/* --- RESPONSIVO MÓVIL --- 
+*/
+@media (max-width: 600px) {
+    nav { padding: 15px; flex-direction: column; gap: 10px; }
+    .hero h2 { font-size: 1.8rem; }
+    .canvas-container { width: 95vw; }
+    #chat-container { width: 90%; right: 5%; height: 50vh; }
+}
+
+body.locked > *:not(#gameWindow) {
+    pointer-events: none;
 }
