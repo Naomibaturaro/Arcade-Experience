@@ -246,3 +246,56 @@ body.game-active::before {
 canvas {
     touch-action: none;
 }
+/* Ocultar controles en PC */
+.mobile-only { display: none; }
+
+@media (max-width: 900px) {
+    .mobile-only { 
+        display: flex; 
+        justify-content: space-around; 
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        position: absolute;
+        bottom: 10px;
+    }
+
+    #gameCanvas {
+        width: 90vw;
+        height: auto;
+        border: 2px solid var(--neon-cyan);
+    }
+
+    /* Estilo del Joystick */
+    #joystick-base {
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid var(--neon-cyan);
+        border-radius: 50%;
+        position: relative;
+        touch-action: none;
+    }
+
+    #joystick-stick {
+        width: 50px;
+        height: 50px;
+        background: var(--neon-pink);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 15px var(--neon-pink);
+    }
+
+    .btn-round {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: none;
+        background: var(--neon-cyan);
+        color: #000;
+        font-weight: bold;
+        box-shadow: 0 0 15px var(--neon-cyan);
+    }
+}
