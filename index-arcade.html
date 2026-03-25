@@ -68,11 +68,12 @@
         
         <div class="canvas-container">
             <div id="overlay">
-                <h2>MISIÓN FALLIDA</h2>
-                <p id="finalScore">PUNTAJE: 0</p>
-                <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
-            </div>
-            
+    <div class="gameover-box">
+        <h2>MISIÓN FALLIDA</h2>
+        <p id="finalScore">PUNTAJE: 0</p>
+        <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
+    </div>
+</div>          
             <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:5;" onclick="initGame()">INICIAR</button>
             
             <canvas id="gameCanvas" width="400" height="300"></canvas>
