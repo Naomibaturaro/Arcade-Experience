@@ -136,11 +136,10 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
     #chat-container { width: 90%; right: 5%; height: 50vh; }
 }
 
-body.game-active > *:not(#gameWindow) {
-    filter: blur(8px) brightness(0.4);
-    pointer-events: none;
-    user-select: none;
+body.no-session > *:not(#denied-overlay) {
+    display: none !important;
 }
+
 
 html, body {
     overscroll-behavior: none;
