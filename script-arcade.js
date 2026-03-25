@@ -1,15 +1,25 @@
 // 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
 window.onload = () => {
-    if (!sessionStorage.getItem('sessionActive')) {
+    const sessionActive = sessionStorage.getItem('sessionActive');
+    const denied = document.getElementById('denied-overlay');
+
+    if (!sessionActive) {
         document.body.classList.add("no-session");
-        const denied = document.getElementById('denied-overlay');
         if(denied) denied.style.display = 'flex';
-        return;
+        return; 
+    } else {
+        // SEGURIDAD EXTRA: Si hay sesión, borramos el overlay por completo
+        if(denied) denied.remove(); 
+        document.body.classList.remove("no-session");
     }
+
+    // El resto de tu carga normal (HOLA, NAOMI, etc.)
     const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
     const welcomeTitle = document.getElementById('welcome-user');
+    
+    // CORRECCIÓN AQUÍ: Usar backticks ` para que la variable funcione
     if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
-
+    
     setTimeout(() => {
         const loader = document.getElementById("loader");
         if(loader) {
@@ -18,7 +28,6 @@ window.onload = () => {
         }
     }, 1500);
 };
-
 // 2. VARIABLES DE ESTADO GLOBALES
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null; // Unificamos touchDir para Joystick y Botones
