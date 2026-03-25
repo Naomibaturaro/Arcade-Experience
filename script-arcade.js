@@ -19,15 +19,16 @@ window.onload = () => {
     }, 1500);
 };
 
-
-// 2. VARIABLES DE ESTADO GLOBALES
+// 2. VARIABLES GLOBALES
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchX = null, touchY = null;
+let touchDir = null;
 
-// 3. LÓGICA DEL ASISTENTE / CHAT
+// 3. CHAT
 function toggleChat() {
     const chat = document.getElementById('chat-container');
     if (!chat) return;
+
     if (chat.classList.contains('active')) {
         chat.classList.remove('active');
         setTimeout(() => { chat.style.display = 'none'; }, 300);
@@ -48,7 +49,7 @@ function openRandomGame() {
     }
     
     setTimeout(() => { 
-        if(document.getElementById('chat-container').classList.contains('active')) toggleChat();
+        if(document.getElementById('chat-container')?.classList.contains('active')) toggleChat();
         openWindow(randomGame); 
     }, 800);
 }
@@ -58,6 +59,7 @@ function chatLogic(op) {
     if(!msgs) return;
 
     let resp = "";
+
     if (op === 'juegos') {
         const sugerencias = [
             "Te recomiendo 'REBOTE', los efectos de partículas quedaron geniales.",
@@ -65,11 +67,12 @@ function chatLogic(op) {
             "Probá 'JUMP', es ideal para superar récords."
         ];
         resp = sugerencias[Math.floor(Math.random() * sugerencias.length)];
+
     } else if (op === 'error') {
-        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página.";
+        resp = "¡Entendido! Completá el formulario de REPORTE al final de la página.";
         setTimeout(() => {
             toggleChat();
-            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
         }, 1500);
     }
 
@@ -78,18 +81,16 @@ function chatLogic(op) {
 }
 
 
-// 🔒 BLOQUEO TOTAL DE INPUT CUANDO HAY JUEGO
+// 🔒 BLOQUEO TOTAL
 function blockBackgroundInteraction(enable){
     const body = document.body;
 
     if(enable){
         body.classList.add("game-active");
-
         document.addEventListener("touchmove", preventScroll, { passive: false });
         document.addEventListener("wheel", preventScroll, { passive: false });
     } else {
         body.classList.remove("game-active");
-
         document.removeEventListener("touchmove", preventScroll);
         document.removeEventListener("wheel", preventScroll);
     }
@@ -102,23 +103,26 @@ function preventScroll(e){
     }
 }
 
-// Eventos de Touch
+
+// 🎮 TOUCH GLOBAL (VERSIÓN LIMPIA)
 document.addEventListener("touchstart", (e) => {
-    if(document.body.classList.contains("game-active")){
-        e.preventDefault();
-    }
+    if(!document.body.classList.contains("game-active")) return;
+
+    e.preventDefault();
     touchX = e.touches[0].clientX;
     touchY = e.touches[0].clientY;
 }, { passive: false });
 
 document.addEventListener("touchmove", (e) => {
-    if(document.body.classList.contains("game-active")){
-        e.preventDefault();
-    }
+    if(!document.body.classList.contains("game-active")) return;
+
+    e.preventDefault();
     touchX = e.touches[0].clientX;
     touchY = e.touches[0].clientY;
 }, { passive: false });
-/// 4. CONTROL DE VENTANAS Y MOTOR DE JUEGO
+
+
+// 4. GAME WINDOW
 function openWindow(game) {
     stopGame(); 
     currentGame = game;
@@ -130,7 +134,6 @@ function openWindow(game) {
     const overlay = document.getElementById("overlay");
     const canvas = document.getElementById("gameCanvas");
 
-    // 🔥 ACTIVAR BLOQUEO TOTAL
     blockBackgroundInteraction(true);
 
     if(win){
@@ -138,14 +141,12 @@ function openWindow(game) {
         win.classList.add("active");
     }
 
-    // 🔊 SONIDO
     const openSound = document.getElementById("openSound");
-if (openSound) {
-    openSound.currentTime = 0;
-    openSound.play().catch(()=>{});
-}
+    if (openSound) {
+        openSound.currentTime = 0;
+        openSound.play().catch(()=>{});
+    }
 
-    // 📳 Vibración
     if (navigator.vibrate) navigator.vibrate(40);
 
     if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
@@ -157,10 +158,11 @@ if (openSound) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
-// ESTA FUNCIÓN DEBE ESTAR AFUERA
+
 function restartCurrentGame() {
     const overlay = document.getElementById("overlay");
     if(overlay) overlay.style.display = "none";
+
     stopGame(); 
     initGame(); 
 }
@@ -168,6 +170,7 @@ function restartCurrentGame() {
 function initGame() {
     const btn = document.getElementById("startBtn");
     const overlay = document.getElementById("overlay");
+
     if(btn) btn.style.display = "none";
     if(overlay) overlay.style.display = "none";
     
@@ -180,16 +183,15 @@ function initGame() {
     else if(currentGame === 'pacman') startPacMan();
 }
 
-
 function closeGameWindow() {
     const win = document.getElementById("gameWindow");
 
     if(win){
         const closeSound = document.getElementById("closeSound");
-if (closeSound) {
-    closeSound.currentTime = 0;
-    closeSound.play().catch(()=>{});
-}
+        if (closeSound) {
+            closeSound.currentTime = 0;
+            closeSound.play().catch(()=>{});
+        }
 
         if (navigator.vibrate) navigator.vibrate(30);
 
@@ -197,33 +199,38 @@ if (closeSound) {
 
         setTimeout(() => {
             win.classList.remove("active", "closing");
-
-            // 🔥 DESBLOQUEAR FONDO
             blockBackgroundInteraction(false);
-
             stopGame();
         }, 300);
     }
 }
-    function gameOver(score){
+
+
+// 💀 GAME OVER (FIX REAL)
+function gameOver(score){
     const overlay = document.getElementById("overlay");
 
     if(overlay){
         overlay.style.display = "flex";
-        overlay.innerHTML = `
-            <div class="gameover-box">
-                <h2>GAME OVER</h2>
-                <p>PUNTAJE: ${score}</p>
-                <button onclick="restartCurrentGame()">REINTENTAR</button>
-            </div>
+
+        let box = overlay.querySelector(".gameover-box");
+        if(!box){
+            overlay.innerHTML = `<div class="gameover-box"></div>`;
+            box = overlay.querySelector(".gameover-box");
+        }
+
+        box.innerHTML = `
+            <h2>GAME OVER</h2>
+            <p>PUNTAJE: ${score}</p>
+            <button onclick="restartCurrentGame()">REINTENTAR</button>
         `;
     }
 
     const closeSound = document.getElementById("closeSound");
-if (closeSound) {
-    closeSound.currentTime = 0;
-    closeSound.play().catch(()=>{});
-}
+    if (closeSound) {
+        closeSound.currentTime = 0;
+        closeSound.play().catch(()=>{});
+    }
 
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
@@ -231,10 +238,12 @@ if (closeSound) {
 }
 
 
-let touchDir = null;
-
+// 🎮 TOUCH CONTROLS (ÚNICA VERSIÓN)
 function setupTouchControls(){
-    const buttons = document.querySelectorAll("#touchControls button");
+    const container = document.getElementById("touchControls");
+    if(!container) return;
+
+    const buttons = container.querySelectorAll("button");
 
     buttons.forEach(btn => {
         btn.addEventListener("touchstart", (e) => {
@@ -248,7 +257,6 @@ function setupTouchControls(){
         });
     });
 }
-
 // ================= JUEGOS CORREGIDOS =================
 
 function startPacMan() {
