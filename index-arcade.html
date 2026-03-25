@@ -87,16 +87,24 @@
         </div>
     </div>
 
-    <section id="contact" class="contact">
-        <h2 style="color:#0ff">REPORTE DE SISTEMA</h2>
+    <section id="contact" class="section-report">
+    <div class="form-container">
+        <h2>REPORTE DE SISTEMA</h2>
+
         <form action="https://formsubmit.co/ajax/tu-email@ejemplo.com" method="POST">
             <input type="hidden" name="_captcha" value="false">
-            <input type="text" name="name" placeholder="IDENTIFICACIÓN" required>
-            <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
-            <textarea name="report" placeholder="DESCRIBE LA ANOMALÍA" rows="4" required></textarea>
+
+            <div class="form-row">
+                <input type="text" name="name" placeholder="NOMBRE" required>
+                <input type="email" name="email" placeholder="EMAIL DE CONTACTO" required>
+            </div>
+
+            <textarea name="report" placeholder="DESCRIBE EL PROBLEMA" required></textarea>
+
             <button type="submit" class="btn-neon">ENVIAR DATA</button>
         </form>
-    </section>
+    </div>
+</section>
 
     <div class="chat-btn" onclick="toggleChat()">
         <img src="img/robot.png" alt="Asistente Robot" class="chat-robot-img">
@@ -108,10 +116,10 @@
             <button onclick="toggleChat()" style="background:none; border:none; color:#ff00ff; cursor:pointer;">[X]</button>
         </div>
         <div id="chat-messages">
-            <div class="bot-msg">Hola. Soy el asistente de Arcade Experience. ¿En qué módulo puedo ayudarte?</div>
+            <div class="bot-msg">Hola. Soy el asistente de Arcade Experience. ¿En qué puedo ayudarte?</div>
             <div class="user-option" onclick="openRandomGame()">🎮 JUEGO AL AZAR</div>
             <div class="user-option" onclick="chatLogic('juegos')">🔍 SUGERIRME UN JUEGO</div>
-            <div class="user-option" onclick="chatLogic('error')">⚠️ REPORTAR ANOMALÍA</div>
+            <div class="user-option" onclick="chatLogic('error')">⚠️ REPORTAR</div>
         </div>
     </div>
 
