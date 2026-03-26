@@ -16,25 +16,25 @@ window.addEventListener("load", () => {
         if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
     }
 
-    // ACÁ VA EL LOADER TAMBIÉN
+    // LOGICA DEL LOADER (Corregida)
     if(loader){
         setTimeout(() => {
             loader.style.opacity = "0";
-            setTimeout(()=>loader.style.display="none",500);
-        },1500);
+            setTimeout(() => {
+                loader.style.display = "none";
+            }, 500); // <-- Faltaba cerrar bien esta función
+        }, 1500);
     }
+});
 
-}
-
-// FAILSAFE GLOBAL 
+// FAILSAFE GLOBAL (Corregido el comparador !==)
 setTimeout(() => {
     const loader = document.getElementById("loader");
-    if(loader){
+    if(loader && loader.style.display !== "none"){
         loader.style.display = "none";
     }
-},3000);
+}, 3000);
 
-});
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
@@ -204,11 +204,21 @@ function startSnake(){
         if(touchDir==="left"&&dx===0){dx=-20;dy=0;}
         if(touchDir==="right"&&dx===0){dx=20;dy=0;}
         const head={x:snake[0].x+dx,y:snake[0].y+dy};
-        if(head.x<0||head.x>=window.innerWidth||head.y<0||head.y>=window.innerHeight||snake.some(s=>s.x===head.x&&s.y===head.y)){
+        if(head.x<0||head.x>=400||head.y<0||head.y>=300||snake.some(s=>s.x===head.x&&s.y===head.y)){
             gameOver(globalScore); return;
         }
         snake.unshift(head);
-        if(head.x===food.x&&head.y===food.y){globalScore+=10;food={x:Math.floor(Math.random()*(window.innerWidth/20))*20,y:Math.floor(Math.random()*(window.innerHeight/20))*20;}else snake.pop();}
+        if(head.x === food.x && head.y === food.y){
+    globalScore += 10;
+    // Genera comida alineada a la grilla de 20 dentro de los 400x300 del canvas
+    food = {
+        x: Math.floor(Math.random() * 20) * 20, 
+        y: Math.floor(Math.random() * 15) * 20
+    };
+} else {
+    snake.pop();
+}
+
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.fillStyle="#f0f"; ctx.fillRect(food.x,food.y,18,18);
         ctx.fillStyle="#0ff"; snake.forEach(s=>ctx.fillRect(s.x,s.y,18,18));
@@ -340,4 +350,11 @@ function startDodge() {
         animationId = requestAnimationFrame(loop);
     }
     animationId = requestAnimationFrame(loop);
+}
+
+// Añade esto al final de todo 
+function getInputX(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return (clientX - rect.left) * (canvas.width / rect.width);
 }
