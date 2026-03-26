@@ -16,15 +16,6 @@ window.addEventListener("load", () => {
         if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
     }
 
-    // Loader SIEMPRE se oculta
-    setTimeout(() => {
-        if(loader){
-            loader.style.opacity = "0";
-            setTimeout(()=>loader.style.display="none",500);
-        }
-    },1500);
-});
-
 // FAILSAFE GLOBAL
 setTimeout(() => {
     const loader = document.getElementById("loader");
