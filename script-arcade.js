@@ -1,45 +1,37 @@
-// ==================== 1. SESIÓN Y LOADER ====================
+// ==================== 1. INICIO SESIÓN ====================
 window.addEventListener("load", () => {
     const sessionActive = sessionStorage.getItem('sessionActive');
     const denied = document.getElementById('denied-overlay');
+    const loader = document.getElementById("loader");
 
     if (!sessionActive) {
         document.body.classList.add("no-session");
         if(denied) denied.style.display = 'flex';
-        return; 
     } else {
         if(denied) denied.remove();
         document.body.classList.remove("no-session");
+
+        const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
+        const welcomeTitle = document.getElementById('welcome-user');
+        if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
     }
 
-    const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
-    const welcomeTitle = document.getElementById('welcome-user');
-    if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
-
+    // Loader SIEMPRE se oculta
     setTimeout(() => {
-        const loader = document.getElementById("loader");
         if(loader){
             loader.style.opacity = "0";
             setTimeout(()=>loader.style.display="none",500);
         }
     },1500);
-};
-setTimeout(() => {
-    const loader = document.getElementById("loader");
-    if(loader){
-        loader.style.opacity = "0";
-        setTimeout(()=>loader.style.display="none",500);
-    }
-},1500);
+});
 
-// 🔥 FAILSAFE (por si algo falla)
+// FAILSAFE GLOBAL
 setTimeout(() => {
     const loader = document.getElementById("loader");
     if(loader){
         loader.style.display = "none";
     }
 },3000);
-
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
