@@ -184,6 +184,11 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
     padding: 40px 20px;
 }
 
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 /* --- RESPONSIVO MÓVIL --- 
 */
 @media (max-width: 600px) {
@@ -288,8 +293,7 @@ html, body {
 
 /*  FONDO BLOQUEADO REAL */
 body.game-active {
-    overflow: visible
-    ;
+    overflow: hidden;
 }
 
 /* Capa oscura + blur REAL */
@@ -349,10 +353,11 @@ canvas {
     }
 
     #gameCanvas {
-        width: 90vw;
-        height: auto;
-        border: 2px solid var(--neon-cyan);
-    }
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border: 2px solid var(--neon-cyan);
+}
 
     /* Estilo del Joystick */
     #joystick-base {
@@ -391,6 +396,7 @@ canvas {
 .section-report {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 60px;
 }
 
@@ -408,7 +414,7 @@ canvas {
 /* INPUTS */
 input, textarea {
     width: 100%;
-    margin: 10px 0;
+    margin: 12px 0;
     padding: 15px;
     background: #000;
     border: 1px solid var(--primary);
@@ -423,9 +429,6 @@ textarea {
     resize: none;
 }
 
-input, textarea {
-    margin: 12px 0;
-}
 
 /* FOCUS */
 input:focus, textarea:focus {
