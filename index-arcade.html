@@ -34,12 +34,19 @@
         </div>
     </nav>
 
-    <section class="hero">
-        <h2 id="welcome-user">HOLA, JUGADOR</h2>
-        <p>Selecciona un módulo de entretenimiento</p>
-        <br>
-        <button class="btn-neon" onclick="openRandomGame()">MÓDULO AL AZAR</button>
-    </section>
+   <section class="hero">
+
+<div class="hero-content">
+    <h2 id="welcome-user">HOLA, JUGADOR</h2>
+    <p class="hero-subtitle">Selecciona un módulo de entretenimiento</p>
+
+    <button class="btn-neon hero-btn" onclick="openRandomGame()">
+        MÓDULO AL AZAR
+    </button>
+</div>
+
+</section>
+
 
     <section id="games" class="games">
         <div class="card" onclick="openWindow('snake')">
