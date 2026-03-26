@@ -33,6 +33,8 @@ setTimeout(() => {
         loader.style.display = "none";
     }
 },3000);
+
+});
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
