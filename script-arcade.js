@@ -16,7 +16,17 @@ window.addEventListener("load", () => {
         if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
     }
 
-// FAILSAFE GLOBAL
+    // ACÁ VA EL LOADER TAMBIÉN
+    if(loader){
+        setTimeout(() => {
+            loader.style.opacity = "0";
+            setTimeout(()=>loader.style.display="none",500);
+        },1500);
+    }
+
+});
+
+// FAILSAFE GLOBAL 
 setTimeout(() => {
     const loader = document.getElementById("loader");
     if(loader){
