@@ -24,7 +24,7 @@ window.addEventListener("load", () => {
         },1500);
     }
 
-});
+}
 
 // FAILSAFE GLOBAL 
 setTimeout(() => {
