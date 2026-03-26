@@ -1,5 +1,5 @@
 // ==================== 1. SESIÓN Y LOADER ====================
-window.onload = () => {
+window.addEventListener("load", () => {
     const sessionActive = sessionStorage.getItem('sessionActive');
     const denied = document.getElementById('denied-overlay');
 
@@ -24,6 +24,21 @@ window.onload = () => {
         }
     },1500);
 };
+setTimeout(() => {
+    const loader = document.getElementById("loader");
+    if(loader){
+        loader.style.opacity = "0";
+        setTimeout(()=>loader.style.display="none",500);
+    }
+},1500);
+
+// 🔥 FAILSAFE (por si algo falla)
+setTimeout(() => {
+    const loader = document.getElementById("loader");
+    if(loader){
+        loader.style.display = "none";
+    }
+},3000);
 
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
