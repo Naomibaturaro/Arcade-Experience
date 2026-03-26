@@ -92,7 +92,15 @@ nav {
 nav h1 { font-size: 1.5rem; letter-spacing: 4px; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
 nav div a { color: #fff; margin-left: 30px; text-decoration: none; font-size: 0.8rem; transition: 0.3s; }
 nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); }
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
+    text-align: center;
+    padding: 80px 20px 40px;
+}
 /* --- GRID DE JUEGOS --- 
 */
 .games {
@@ -126,24 +134,26 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
 }
 .chat-btn:hover { transform: scale(1.1); filter: drop-shadow(0 0 20px var(--neon-cyan)); }
 .user-option {
-    margin: 10px;
-    padding: 12px;
+    display: block; 
+    width: 90%;
+    margin: 8px auto;
+
+    padding: 10px;
     border: 1px solid var(--neon-cyan);
-    border-radius: 8px;
+    border-radius: 6px;
+
     cursor: pointer;
-
-    font-size: 0.75rem;
-    transition: 0.3s;
     text-align: center;
+    font-size: 0.7rem;
 
-    background: rgba(0, 255, 255, 0.05);
+    background: rgba(0,255,255,0.05);
+    transition: 0.25s;
 }
 
 .user-option:hover {
     background: var(--neon-cyan);
     color: #000;
-    box-shadow: 0 0 10px var(--neon-cyan);
-    transform: scale(1.05);
+    box-shadow: 0 0 8px var(--neon-cyan);
 }
 #chat-container {
     position: fixed; bottom: 95px; right: 20px; width: 320px; height: 450px;
@@ -163,6 +173,15 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
     padding: 10px;
     background: rgba(0,0,0,0.6);
     border-left: 2px solid var(--neon-pink);
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
 /* --- RESPONSIVO MÓVIL --- 
