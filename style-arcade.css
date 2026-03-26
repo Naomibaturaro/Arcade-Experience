@@ -125,7 +125,26 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
     object-fit: contain;
 }
 .chat-btn:hover { transform: scale(1.1); filter: drop-shadow(0 0 20px var(--neon-cyan)); }
+.user-option {
+    margin: 10px;
+    padding: 12px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 8px;
+    cursor: pointer;
 
+    font-size: 0.75rem;
+    transition: 0.3s;
+    text-align: center;
+
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.user-option:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    box-shadow: 0 0 10px var(--neon-cyan);
+    transform: scale(1.05);
+}
 #chat-container {
     position: fixed; bottom: 95px; right: 20px; width: 320px; height: 450px;
     background: rgba(5, 5, 5, 0.95); border: 2px solid var(--neon-cyan);
@@ -133,16 +152,31 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
     display: none; flex-direction: column; z-index: 998;
     backdrop-filter: blur(10px);
 }
-
+#chat-messages {
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 0.7rem;
+}
 #chat-container.active { display: flex; animation: chatSlideUp 0.4s ease-out; }
+.bot-msg {
+    margin: 10px;
+    padding: 10px;
+    background: rgba(0,0,0,0.6);
+    border-left: 2px solid var(--neon-pink);
+}
 
 /* --- RESPONSIVO MÓVIL --- 
 */
 @media (max-width: 600px) {
     nav { padding: 15px; flex-direction: column; gap: 10px; }
     .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
     text-align: center;
-    padding: 60px 20px;
+    padding: 80px 20px 40px;
 }
     .canvas-container { width: 95vw; }
     #chat-container { width: 90%; right: 5%; height: 50vh; }
