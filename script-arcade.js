@@ -1,4 +1,4 @@
-// 1. VERIFICACIÓN DE SESIÓN Y CARGA INICIAL
+// ==================== 1. SESIÓN Y LOADER ====================
 window.onload = () => {
     const sessionActive = sessionStorage.getItem('sessionActive');
     const denied = document.getElementById('denied-overlay');
@@ -8,339 +8,326 @@ window.onload = () => {
         if(denied) denied.style.display = 'flex';
         return; 
     } else {
-        // SEGURIDAD EXTRA: Si hay sesión, borramos el overlay por completo
-        if(denied) denied.remove(); 
+        if(denied) denied.remove();
         document.body.classList.remove("no-session");
     }
- 
+
     const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
     const welcomeTitle = document.getElementById('welcome-user');
-    
-    // Usar backticks ` para que la variable funcione
     if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
-    
+
     setTimeout(() => {
         const loader = document.getElementById("loader");
-        if(loader) {
+        if(loader){
             loader.style.opacity = "0";
-            setTimeout(() => { loader.style.display = "none"; }, 500);
+            setTimeout(()=>loader.style.display="none",500);
         }
-    }, 1500);
+    },1500);
 };
-// 2. VARIABLES DE ESTADO GLOBALES
-let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
-let touchDir = null; // Unificamos touchDir para Joystick y Botones
 
-// 3. LÓGICA DEL ASISTENTE / CHAT
+// ==================== 2. VARIABLES GLOBALES ====================
+let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
+let touchDir = null;
+let lives = 3;
+
+// ==================== 3. CHAT ====================
 function toggleChat() {
     const chat = document.getElementById('chat-container');
     if (!chat) return;
     if (chat.classList.contains('active')) {
         chat.classList.remove('active');
-        setTimeout(() => { chat.style.display = 'none'; }, 300);
+        setTimeout(() => chat.style.display='none',300);
     } else {
-        chat.style.display = 'flex';
-        setTimeout(() => { chat.classList.add('active'); }, 10);
+        chat.style.display='flex';
+        setTimeout(() => chat.classList.add('active'),10);
     }
 }
 
 function openRandomGame() {
-    const games = ['snake', 'pacman', 'dodge', 'breakout'];
-    const randomGame = games[Math.floor(Math.random() * games.length)];
+    const games = ['snake','pacman','breakout'];
+    const randomGame = games[Math.floor(Math.random()*games.length)];
     const msgs = document.getElementById('chat-messages');
-    if(msgs) {
+    if(msgs){
         msgs.innerHTML += `<div class="bot-msg">🤖: ¡Buena elección! Iniciando ${randomGame.toUpperCase()}...</div>`;
         msgs.scrollTop = msgs.scrollHeight;
     }
-    setTimeout(() => { 
+    setTimeout(()=>{ 
         if(document.getElementById('chat-container').classList.contains('active')) toggleChat();
-        openWindow(randomGame); 
-    }, 800);
+        openWindow(randomGame);
+    },800);
 }
 
-function chatLogic(op) {
-    const msgs = document.getElementById('chat-messages');
-    if(!msgs) return;
-    let resp = "";
-    if (op === 'juegos') {
-        const sugerencias = [
-            "Te recomiendo 'REBOTE', los efectos de partículas quedaron geniales.",
-            "Si buscas un reto, el modo 'DODGE' ahora es más veloz.",
-            "Probá 'JUMP', es ideal para superar récords."
-        ];
-        resp = sugerencias[Math.floor(Math.random() * sugerencias.length)];
-    } else if (op === 'error') {
-        resp = "¡Entendido! Completá el formulario de **REPORTE** al final de la página.";
-        setTimeout(() => {
-            toggleChat();
-            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-        }, 1500);
-    }
-    msgs.innerHTML += `<div class="bot-msg">🤖: ${resp}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-}
-
-// 4. BLOQUEO DE INPUT Y JOYSTICK LOGIC
+// ==================== 4. BLOQUEO DE FONDO ====================
 function blockBackgroundInteraction(enable){
-    const body = document.body;
+    const body=document.body;
     if(enable){
         body.classList.add("game-active");
-        document.addEventListener("touchmove", preventScroll, { passive: false });
+        document.addEventListener("touchmove",preventScroll,{passive:false});
     } else {
         body.classList.remove("game-active");
-        document.removeEventListener("touchmove", preventScroll);
+        document.removeEventListener("touchmove",preventScroll);
     }
 }
-
 function preventScroll(e){
     if(document.getElementById("gameWindow")?.classList.contains("active")) e.preventDefault();
 }
 
-// --- NUEVA LÓGICA DE JOYSTICK  ---
+// ==================== 5. JOYSTICK ====================
 const joystickBase = document.getElementById('joystick-base');
 const joystickStick = document.getElementById('joystick-stick');
 
-if (joystickBase) {
-    joystickBase.addEventListener('touchmove', (e) => {
+if(joystickBase){
+    joystickBase.addEventListener('touchmove', e=>{
         e.preventDefault();
         const touch = e.touches[0];
         const rect = joystickBase.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const deltaX = touch.clientX - centerX;
-        const deltaY = touch.clientY - centerY;
-        const dist = Math.min(40, Math.sqrt(deltaX**2 + deltaY**2));
-        const angle = Math.atan2(deltaY, deltaX);
-
-        joystickStick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
-
-        // Mapeo a tu touchDir original para que los juegos lo entiendan
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            touchDir = deltaX > 0 ? "right" : "left";
-        } else {
-            touchDir = deltaY > 0 ? "down" : "up";
-        }
-    }, { passive: false });
-
-    joystickBase.addEventListener('touchend', () => {
-        joystickStick.style.transform = `translate(-50%, -50%)`;
-        if(currentGame !== 'snake') touchDir = null;
+        const centerX = rect.left+rect.width/2;
+        const centerY = rect.top+rect.height/2;
+        const deltaX = touch.clientX-centerX;
+        const deltaY = touch.clientY-centerY;
+        const dist = Math.min(40,Math.sqrt(deltaX**2+deltaY**2));
+        const angle = Math.atan2(deltaY,deltaX);
+        joystickStick.style.transform = `translate(calc(-50%+${Math.cos(angle)*dist}px), calc(-50%+${Math.sin(angle)*dist}px))`;
+        if(Math.abs(deltaX)>Math.abs(deltaY)) touchDir=deltaX>0?"right":"left";
+        else touchDir=deltaY>0?"down":"up";
+    },{passive:false});
+    joystickBase.addEventListener('touchend',()=>{
+        joystickStick.style.transform = `translate(-50%,-50%)`;
+        touchDir=null;
     });
 }
 
-// 5. CONTROL DE VENTANAS
-function openWindow(game) {
-    stopGame(); 
-    currentGame = game;
-    touchDir = null; // Reset de dirección
+// ==================== 6. CONTROL DE VENTANAS ====================
+function openWindow(game){
+    stopGame();
+    currentGame=game;
+    touchDir=null;
+    lives=3;
+    globalScore=0;
 
-    const win = document.getElementById("gameWindow");
+    const win=document.getElementById("gameWindow");
+    const title=document.getElementById("gameTitle");
+    const overlay=document.getElementById("overlay");
+    const btn=document.getElementById("startBtn");
+
     blockBackgroundInteraction(true);
 
-    if(win){
+    if(win){ 
         win.classList.remove("closing");
         win.classList.add("active");
     }
+    if(title) title.innerText=`MÓDULO: ${game.toUpperCase()}`;
+    if(overlay) overlay.style.display="none";
+    if(btn) btn.style.display="block";
 
-    const openSound = document.getElementById("openSound");
-    if (openSound) { openSound.currentTime = 0; openSound.play().catch(()=>{}); }
-    if (navigator.vibrate) navigator.vibrate(40);
-
-    document.getElementById("gameTitle").innerText = `MÓDULO: ${game.toUpperCase()}`;
-    document.getElementById("overlay").style.display = "none";
-    document.getElementById("startBtn").style.display = "block";
+    const openSound=document.getElementById("openSound");
+    if(openSound){ openSound.currentTime=0; openSound.play().catch(()=>{}); }
+    if(navigator.vibrate) navigator.vibrate(40);
 }
 
-function initGame() {
-    document.getElementById("startBtn").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-    gameActive = true; 
-    globalScore = 0;
+function initGame(){
+    document.getElementById("startBtn").style.display="none";
+    document.getElementById("overlay").style.display="none";
+    gameActive=true;
+    globalScore=0;
 
-    if(currentGame === 'snake') startSnake();
-    else if(currentGame === 'breakout') startBreakout();
-    else if(currentGame === 'dodge') startDodge();
-    else if(currentGame === 'pacman') startPacMan();
+    if(currentGame==='snake') startSnake();
+    else if(currentGame==='pacman') startPacMan();
+    else if(currentGame==='breakout') startBreakout();
 }
 
 function stopGame(){
-    gameActive = false;
+    gameActive=false;
     if(animationId) cancelAnimationFrame(animationId);
     if(window.gameInterval) clearInterval(window.gameInterval);
-    document.onkeydown = null;
+    document.onkeydown=null;
 }
 
 function gameOver(score){
-    document.getElementById("finalScore").innerText = "PUNTAJE: " + score;
-    document.getElementById("overlay").style.display = "flex";
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    lives--;
+    if(lives>0){
+        // Reinicia juego automáticamente con vidas restantes
+        initGame();
+        return;
+    }
+    gameActive=false;
+    const fScore=document.getElementById("finalScore");
+    const overlay=document.getElementById("overlay");
+    if(fScore) fScore.innerText="PUNTAJE: "+score;
+    if(overlay) overlay.style.display="flex";
     stopGame();
 }
 
-function closeGameWindow() {
-    const win = document.getElementById("gameWindow");
+function closeGameWindow(){
+    const win=document.getElementById("gameWindow");
     if(win){
         win.classList.add("closing");
-        setTimeout(() => {
-            win.classList.remove("active", "closing");
+        setTimeout(()=>{
+            win.classList.remove("active","closing");
             blockBackgroundInteraction(false);
             stopGame();
-        }, 300);
+        },300);
     }
 }
-function restartCurrentGame() {
-    document.getElementById("overlay").style.display = "none";
-    stopGame();
-    setTimeout(() => initGame(), 50);
-}
-// ================= JUEGOS =================
 
-function startSnake() {
-    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let snake = [{x: 200, y: 140}, {x: 180, y: 140}], food = {x: 100, y: 100}, dx = 20, dy = 0, lastUpdate = 0;
+// ==================== 7. JUEGOS ====================
 
-    document.onkeydown = (e) => {
-        if(e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
-        else if(e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
-        else if(e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
-        else if(e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
+// 7.1 Snake
+function startSnake(){
+    const canvas=document.getElementById('gameCanvas');
+    const ctx=canvas.getContext('2d');
+    let snake=[{x:200,y:140},{x:180,y:140}],food={x:100,y:100},dx=20,dy=0,lastUpdate=0;
+    document.onkeydown=(e)=>{
+        if(e.key==="ArrowUp"&&dy===0){dx=0;dy=-20;}
+        if(e.key==="ArrowDown"&&dy===0){dx=0;dy=20;}
+        if(e.key==="ArrowLeft"&&dx===0){dx=-20;dy=0;}
+        if(e.key==="ArrowRight"&&dx===0){dx=20;dy=0;}
     };
-
-    function loop(time) {
-        if (!gameActive) return;
-        animationId = requestAnimationFrame(loop);
-        
-        // El joystick ahora llena touchDir, y esto lo detecta:
-        if(touchDir === "up" && dy === 0){ dx=0; dy=-20; }
-        if(touchDir === "down" && dy === 0){ dx=0; dy=20; }
-        if(touchDir === "left" && dx === 0){ dx=-20; dy=0; }
-        if(touchDir === "right" && dx === 0){ dx=20; dy=0; }
-
-        if (time - lastUpdate < 100) return;
-        lastUpdate = time;
-
-        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-        if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 300 || snake.some(s => s.x === head.x && s.y === head.y)) { 
-            gameOver(globalScore); return; 
+    function loop(time){
+        if(!gameActive) return;
+        animationId=requestAnimationFrame(loop);
+        if(time-lastUpdate<100) return;
+        lastUpdate=time;
+        // Joystick
+        if(touchDir==="up"&&dy===0){dx=0;dy=-20;}
+        if(touchDir==="down"&&dy===0){dx=0;dy=20;}
+        if(touchDir==="left"&&dx===0){dx=-20;dy=0;}
+        if(touchDir==="right"&&dx===0){dx=20;dy=0;}
+        const head={x:snake[0].x+dx,y:snake[0].y+dy};
+        if(head.x<0||head.x>=window.innerWidth||head.y<0||head.y>=window.innerHeight||snake.some(s=>s.x===head.x&&s.y===head.y)){
+            gameOver(globalScore); return;
         }
         snake.unshift(head);
-        if (head.x === food.x && head.y === food.y) { 
-            globalScore += 10; 
-            food = { x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*15)*20 };
-        } else { snake.pop(); }
-
-        ctx.clearRect(0, 0, 400, 300);
-        ctx.fillStyle = "#f0f"; ctx.fillRect(food.x, food.y, 18, 18);
-        ctx.fillStyle = "#0ff"; snake.forEach(s => ctx.fillRect(s.x, s.y, 18, 18));
+        if(head.x===food.x&&head.y===food.y){globalScore+=10;food={x:Math.floor(Math.random()*(window.innerWidth/20))*20,y:Math.floor(Math.random()*(window.innerHeight/20))*20;}else snake.pop();}
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="#f0f"; ctx.fillRect(food.x,food.y,18,18);
+        ctx.fillStyle="#0ff"; snake.forEach(s=>ctx.fillRect(s.x,s.y,18,18));
     }
     loop(0);
 }
 
-function startPacMan() {
-    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    const grid = 20, maze = [
+// 7.2 Pac-Man con fantasmas
+function startPacMan(){
+    const canvas=document.getElementById('gameCanvas');
+    const ctx=canvas.getContext('2d');
+    const grid=20;
+    const maze=[
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
         [1,2,1,2,1,2,1,1,2,1,2,1,1,1,1,1,1,1,2,1],
         [1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
-    const offsetY = 100;
-    let px = 20, py = 120, score = 0, dir = {x:0, y:0}, speed = 2;
+    const offsetY=100;
+    let px=20,py=120,score=0,dir={x:0,y:0},speed=3;
+    let ghosts=[
+        {x:340,y:120,dx:-2,dy:0,color:"red"},
+        {x:340,y:180,dx:0,dy:-2,color:"pink"},
+        {x:40,y:180,dx:2,dy:0,color:"cyan"}
+    ];
 
-    document.onkeydown = (e) => {
-        if(e.key === "ArrowLeft") dir={x:-speed, y:0};
-        else if(e.key === "ArrowRight") dir={x:speed, y:0};
-        else if(e.key === "ArrowUp") dir={x:0, y:-speed};
-        else if(e.key === "ArrowDown") dir={x:0, y:speed};
+    document.onkeydown=(e)=>{
+        if(e.key==="ArrowLeft") dir={x:-speed,y:0};
+        if(e.key==="ArrowRight") dir={x:speed,y:0};
+        if(e.key==="ArrowUp") dir={x:0,y:-speed};
+        if(e.key==="ArrowDown") dir={x:0,y:speed};
     };
 
-    function loop() {
+    function loop(){
         if(!gameActive) return;
-        
-        // CONEXIÓN CON JOYSTICK
-        if(touchDir === "left") dir={x:-speed, y:0};
-        if(touchDir === "right") dir={x:speed, y:0};
-        if(touchDir === "up") dir={x:0, y:-speed};
-        if(touchDir === "down") dir={x:0, y:speed};
 
-        let nextX = px + dir.x, nextY = py + dir.y;
-        let col = Math.floor((nextX + 10) / grid), row = Math.floor((nextY - offsetY + 10) / grid);
+        if(touchDir==="left") dir={x:-speed,y:0};
+        if(touchDir==="right") dir={x:speed,y:0};
+        if(touchDir==="up") dir={x:0,y:-speed};
+        if(touchDir==="down") dir={x:0,y:speed};
 
-        if (maze[row] && maze[row][col] !== 1) {
-            px = nextX; py = nextY;
-            if(maze[row][col] === 2) { maze[row][col] = 0; score += 10; globalScore = score; }
-        }
+        let nextX=px+dir.x,nextY=py+dir.y;
+        let col=Math.floor((nextX+10)/grid),row=Math.floor((nextY-offsetY+10)/grid);
+        if(maze[row]&&maze[row][col]!==1){ px=nextX; py=nextY; if(maze[row][col]===2){ maze[row][col]=0;score+=10;globalScore=score;} }
 
-        ctx.fillStyle="#000"; ctx.fillRect(0,0,400,300);
-        for(let r=0; r<maze.length; r++) {
-            for(let c=0; c<maze[r].length; c++) {
-                if(maze[r][c] === 1) { ctx.fillStyle="#00f"; ctx.fillRect(c*20, r*20+offsetY, 20, 20); }
-                else if(maze[r][c] === 2) { ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(c*20+10, r*20+offsetY+10, 3, 0, 7); ctx.fill(); }
+        // Fantasmas
+        ghosts.forEach(g=>{
+            g.x+=g.dx; g.y+=g.dy;
+            let gCol=Math.floor((g.x+10)/grid),gRow=Math.floor((g.y-offsetY+10)/grid);
+            if(maze[gRow]?.[gCol]===1) { g.dx*=-1; g.dy*=-1; }
+            if(Math.abs(px-g.x)<15&&Math.abs(py-g.y)<15){ gameOver(globalScore);}
+        });
+
+        ctx.fillStyle="#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        for(let r=0;r<maze.length;r++){
+            for(let c=0;c<maze[r].length;c++){
+                if(maze[r][c]===1){ ctx.fillStyle="#00f"; ctx.fillRect(c*grid,r*grid+offsetY,grid,grid); }
+                if(maze[r][c]===2){ ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(c*grid+10,r*grid+offsetY+10,3,0,7); ctx.fill(); }
             }
         }
-        ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(px+10, py+10, 8, 0, 7); ctx.fill();
-        animationId = requestAnimationFrame(loop);
+        ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(px+10,py+10,8,0,7); ctx.fill();
+        ghosts.forEach(g=>{ctx.fillStyle=g.color; ctx.beginPath(); ctx.arc(g.x+10,g.y+10,8,0,7); ctx.fill();});
+        animationId=requestAnimationFrame(loop);
     }
     loop();
 }
 
-function startBreakout() {
-    const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
-    let paddleX=160, ballX=200, ballY=250, ballDX=3, ballDY=-3, score=0, keys = {};
+// 7.3 Breakout con bloques
+function startBreakout(){
+    const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
+    let paddleX=160, ballX=200, ballY=250, ballDX=4, ballDY=-4, score=0;
+    const rows=4,cols=6,bricks=[];
+    for(let c=0;c<cols;c++){ bricks[c]=[]; for(let r=0;r<rows;r++) bricks[c][r]={status:1}; }
 
-    document.onkeydown = (e) => keys[e.key] = true;
-    document.onkeyup = (e) => keys[e.key] = false;
+    document.onkeydown=e=>{ if(e.key==="ArrowLeft") paddleX-=7; if(e.key==="ArrowRight") paddleX+=7; };
 
-    function loop() {
+    function loop(){
         if(!gameActive) return;
-        
-        // CONEXIÓN CON JOYSTICK + TECLADO
-        if((keys.ArrowLeft || touchDir === "left") && paddleX > 0) paddleX -= 7;
-        if((keys.ArrowRight || touchDir === "right") && paddleX < 320) paddleX += 7;
-
-        ballX += ballDX; ballY += ballDY;
-        if(ballX<0 || ballX>390) ballDX *= -1;
-        if(ballY<0) ballDY *= -1;
-        if(ballY>280 && ballX>paddleX && ballX<paddleX+80) ballDY = -Math.abs(ballDY);
-        if(ballY>300) return gameOver(score);
-
-        ctx.fillStyle="#000"; ctx.fillRect(0,0,400,300);
+        ctx.fillStyle="#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.fillStyle="#0ff"; ctx.fillRect(paddleX,280,80,10);
         ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(ballX,ballY,6,0,7); ctx.fill();
-        animationId = requestAnimationFrame(loop);
+
+        ballX+=ballDX; ballY+=ballDY;
+        if(ballX<=0||ballX>=canvas.width-6) ballDX*=-1;
+        if(ballY<=0) ballDY*=-1;
+        if(ballY>=280&&ballX>paddleX&&ballX<paddleX+80) ballDY=-Math.abs(ballDY);
+        if(ballY>canvas.height){ gameOver(globalScore); return; }
+
+        for(let c=0;c<cols;c++){
+            for(let r=0;r<rows;r++){
+                const b=bricks[c][r];
+                if(b.status>0){
+                    let rx=c*65+10,ry=r*25+40;
+                    ctx.fillStyle="#f0f"; ctx.fillRect(rx,ry,60,18);
+                    if(ballX>rx&&ballX<rx+60&&ballY>ry&&ballY<ry+18){ ballDY*=-1; b.status--; globalScore+=10;}
+                }
+            }
+        }
+        animationId=requestAnimationFrame(loop);
     }
     loop();
 }
-
+// 7.4 Dodge
 function startDodge() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let px = 180, obs = [], keys = {};
-
+    let px = 180, obs = [], keys = {}, speedMultiplier = 1;
     document.onkeydown = (e) => keys[e.key] = true;
     document.onkeyup = (e) => keys[e.key] = false;
-
+    canvas.onmousemove = canvas.ontouchmove = (e) => px = getInputX(e, canvas) - 10;
     window.gameInterval = setInterval(() => {
-        if(gameActive) obs.push({ x: Math.random()*370, y: -30, speed: 3+Math.random()*3 });
-    }, 500);
-
+        if(!gameActive) return;
+        let type = Math.random() > 0.8 ? 'GLITCH' : 'DATA'; 
+        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, type: type, speed: (3 + Math.random() * 3) * speedMultiplier });
+    }, 450);
     function loop() {
         if (!gameActive) return;
-
-        // CONEXIÓN CON JOYSTICK + TECLADO
-        if ((keys.ArrowLeft || touchDir === "left") && px > 0) px -= 7;
-        if ((keys.ArrowRight || touchDir === "right") && px < 380) px += 7;
-
-        ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(0,0,400,300);
-        ctx.fillStyle = "#0ff"; ctx.fillRect(px, 270, 20, 20);
-
+        if (keys["ArrowLeft"]) px -= 7; if (keys["ArrowRight"]) px += 7;
+        if (px < 0) px = 0; if (px > 380) px = 380;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.fillRect(0, 0, 400, 300);
+        ctx.fillStyle = "#0ff"; ctx.beginPath(); ctx.moveTo(px+10, 270); ctx.lineTo(px, 290); ctx.lineTo(px+20, 290); ctx.fill();
         obs.forEach((o, i) => {
             o.y += o.speed;
-            ctx.fillStyle = "#f00"; ctx.fillRect(o.x, o.y, 25, 25);
-            if (o.y > 250 && o.y < 290 && o.x < px+20 && o.x+25 > px) gameOver(globalScore);
+            ctx.fillStyle = o.type === 'GLITCH' ? "#ff00ff" : "#fff";
+            ctx.fillRect(o.x, o.y, o.w, o.h);
+            if (o.y > 260 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) gameOver(globalScore);
             if (o.y > 300) { obs.splice(i, 1); globalScore++; }
         });
         animationId = requestAnimationFrame(loop);
     }
-    loop();
+    animationId = requestAnimationFrame(loop);
 }
