@@ -12,12 +12,11 @@ window.onload = () => {
         if(denied) denied.remove(); 
         document.body.classList.remove("no-session");
     }
-
-    // El resto de tu carga normal (HOLA, NAOMI, etc.)
+ 
     const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
     const welcomeTitle = document.getElementById('welcome-user');
     
-    // CORRECCIÓN AQUÍ: Usar backticks ` para que la variable funcione
+    // Usar backticks ` para que la variable funcione
     if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
     
     setTimeout(() => {
@@ -97,7 +96,7 @@ function preventScroll(e){
     if(document.getElementById("gameWindow")?.classList.contains("active")) e.preventDefault();
 }
 
-// --- NUEVA LÓGICA DE JOYSTICK (Integrada a tu touchDir) ---
+// --- NUEVA LÓGICA DE JOYSTICK  ---
 const joystickBase = document.getElementById('joystick-base');
 const joystickStick = document.getElementById('joystick-stick');
 
@@ -189,8 +188,12 @@ function closeGameWindow() {
         }, 300);
     }
 }
-
-// ================= JUEGOS (USANDO TU LÓGICA ORIGINAL) =================
+function restartCurrentGame() {
+    document.getElementById("overlay").style.display = "none";
+    stopGame();
+    setTimeout(() => initGame(), 50);
+}
+// ================= JUEGOS =================
 
 function startSnake() {
     const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
