@@ -38,10 +38,10 @@
 
 <div class="hero-content">
     <h2 id="welcome-user">HOLA, JUGADOR</h2>
-    <p class="hero-subtitle">Selecciona un módulo de entretenimiento</p>
+    <p class="hero-subtitle">Selecciona un juego</p>
 
     <button class="btn-neon hero-btn" onclick="openRandomGame()">
-        MÓDULO AL AZAR
+        JUEGO AL AZAR
     </button>
 </div>
 
@@ -51,11 +51,11 @@
     <section id="games" class="games">
         <div class="card" onclick="openWindow('snake')">
             <h3>SNAKE</h3>
-            <p>Protocolo de crecimiento infinito</p>
+            <p>Crecimiento infinito</p>
         </div>
         <div class="card" onclick="openWindow('pacman')">
             <h3>PAC-MAN</h3>
-            <p>Simulación de recolección de datos</p>
+            <p>Simulación del reconocido videojuego</p>
         </div>
         <div class="card" onclick="openWindow('breakout')">
             <h3>BREAKOUT</h3>
@@ -63,23 +63,25 @@
         </div>
         <div class="card" onclick="openWindow('dodge')">
             <h3>DODGE</h3>
-            <p>Prueba de evasión de riesgos</p>
+            <p>Esquiva a los intrusos</p>
         </div>
     </section>
 
     <div id="gameWindow" class="window">
-        <div class="window-header">
-            <span id="gameTitle">SISTEMA LISTO</span>
-            <button class="close-btn" onclick="closeGameWindow()">[X]</button>
-        </div>
-<div id="controls-container" class="mobile-only">
-    <div id="joystick-base">
-        <div id="joystick-stick"></div>
+    <div class="window-header">
+        <span id="gameTitle">SISTEMA LISTO</span>
+        <button class="close-btn" onclick="closeGameWindow()">[X]</button>
     </div>
-    <div class="action-buttons">
-        <button id="btn-a" class="btn-round">A</button>
+
+    <div id="lives-container">
+        <span class="life-icon">❤️</span>
+        <span class="life-icon">❤️</span>
+        <span class="life-icon">❤️</span>
     </div>
-</div>        
+        <div class="canvas-container">
+        <canvas id="gameCanvas" width="400" height="300"></canvas>
+    </div>
+</div>  
         <div class="canvas-container">
             <div id="overlay">
     <div class="gameover-box">
@@ -131,13 +133,14 @@
     </div>
 
     <div id="success-overlay">
-        <div class="robot-3d-container">
-            <img src="img/robot.png" alt="Robot" class="robot-img">
-        </div>
-        <h1>¡DATA RECIBIDA!</h1>
-        <p>SISTEMA: La anomalía ha sido registrada con éxito.</p>
-        <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
+    <div class="robot-3d-container">
+        <img src="img/robot.png" alt="Robot" class="robot-img">
     </div>
+    <h1>¡DATA RECIBIDA!</h1>
+    <p>SISTEMA: La anomalía ha sido enviada con éxito.</p>
+    <button class="btn-neon" onclick="document.getElementById('success-overlay').style.display='none'">ENTENDIDO</button>
+</div>
+            
     <audio id="openSound" src="sounds/open.mp3"></audio>
 <audio id="closeSound" src="sounds/close.mp3"></audio>
 
