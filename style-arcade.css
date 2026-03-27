@@ -44,6 +44,7 @@ body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 .robot-3d-container {
     perspective: 1000px;
