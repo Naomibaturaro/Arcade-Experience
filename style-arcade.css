@@ -492,3 +492,28 @@ input:focus, textarea:focus {
 .contact form button {
     margin-top: 15px;
 }
+
+/* --- ESTILOS DEL CONTADOR DE VIDAS --- */
+#lives-container {
+    position: absolute;
+    top: 50px; /* Ajusta esto según el alto de tu window-header */
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 20; /* Por encima del canvas */
+    pointer-events: none; /* Para que no interfiera con los clics */
+}
+
+.life-icon {
+    font-size: 1.5rem;
+    color: var(--neon-pink); /* Color base rosa */
+    text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); /* Brillo neón rosa */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Clase para cuando una vida desaparece (se apaga) */
+.life-icon.lost {
+    opacity: 0.2; /* Casi invisible */
+    transform: scale(0.8); /* Se encoge un poco */
+    text-shadow: none; /* Pierde el brillo */
+}
