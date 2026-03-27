@@ -127,17 +127,23 @@ function openWindow(game){
         win.classList.add("active");
     }
     if(title) title.innerText=`MÓDULO: ${game.toUpperCase()}`;
-    if(overlay) overlay.style.display="none";
+    if(overlay) overlay.style.display="flex";
     if(btn) btn.style.display="block";
+  
 
     const openSound=document.getElementById("openSound");
     if(openSound){ openSound.currentTime=0; openSound.play().catch(()=>{}); }
     if(navigator.vibrate) navigator.vibrate(40);
+
+    const mobileControls = document.querySelector('.mobile-only');
+    if(mobileControls && window.innerWidth < 900) {
+        mobileControls.style.display = 'flex';
 }
 
 function initGame(){
     document.getElementById("startBtn").style.display="none";
     document.getElementById("overlay").style.display="none";
+    document.querySelector(".gameover-box").style.display = "none";
     gameActive=true;
     globalScore=0;
     
