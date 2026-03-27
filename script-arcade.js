@@ -180,6 +180,23 @@ function closeGameWindow(){
     }
 }
 
+document.getElementById('contact-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const successOverlay = document.getElementById('success-overlay');
+
+    fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+    })
+    .then(response => response.ok ? response.json() : Promise.reject())
+    .then(() => {
+        if(successOverlay) successOverlay.style.display = 'flex';
+        form.reset();
+    })
+    .catch(error => alert("Error al enviar: Asegúrate de haber confirmado tu mail en FormSubmit"));
+});
+
 // ==================== 7. JUEGOS ====================
 
 // 7.1 Snake
@@ -352,9 +369,20 @@ function startDodge() {
     animationId = requestAnimationFrame(loop);
 }
 
-// Añade esto al final de todo 
+// final de todo 
 function getInputX(e, canvas) {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     return (clientX - rect.left) * (canvas.width / rect.width);
+}
+// Restart
+function restartCurrentGame() {
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "none";
+    
+    // Reseteamos valores antes de iniciar
+    lives = 3; 
+    globalScore = 0;
+    
+    initGame();
 }
