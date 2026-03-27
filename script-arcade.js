@@ -153,21 +153,27 @@ function stopGame(){
     document.onkeydown=null;
 }
 
-function gameOver(score){
+function gameOver(score) {
+    // 1. Detenemos cualquier proceso anterior INMEDIATAMENTE
+    stopGame(); 
+
     lives--;
-    if(lives>0){
-        // Reinicia juego automáticamente con vidas restantes
-        initGame();
+    
+    if (lives > 0) {
+        // Pequeña pausa para que el jugador respire antes de reaparecer
+        setTimeout(() => {
+            if (currentGame) initGame();
+        }, 500);
         return;
     }
-    gameActive=false;
-    const fScore=document.getElementById("finalScore");
-    const overlay=document.getElementById("overlay");
-    if(fScore) fScore.innerText="PUNTAJE: "+score;
-    if(overlay) overlay.style.display="flex";
-    stopGame();
-}
 
+    // Si no hay vidas, mostramos el overlay de Misión Fallida
+    gameActive = false;
+    const fScore = document.getElementById("finalScore");
+    const overlay = document.getElementById("overlay");
+    if (fScore) fScore.innerText = "PUNTAJE: " + score;
+    if (overlay) overlay.style.display = "flex";
+}
 function closeGameWindow(){
     const win=document.getElementById("gameWindow");
     if(win){
@@ -199,50 +205,92 @@ document.getElementById('contact-form')?.addEventListener('submit', function(e) 
 
 // ==================== 7. JUEGOS ====================
 
-// 7.1 Snake
-function startSnake(){
-    const canvas=document.getElementById('gameCanvas');
-    const ctx=canvas.getContext('2d');
-    let snake=[{x:200,y:140},{x:180,y:140}],food={x:100,y:100},dx=20,dy=0,lastUpdate=0;
-    document.onkeydown=(e)=>{
-        if(e.key==="ArrowUp"&&dy===0){dx=0;dy=-20;}
-        if(e.key==="ArrowDown"&&dy===0){dx=0;dy=20;}
-        if(e.key==="ArrowLeft"&&dx===0){dx=-20;dy=0;}
-        if(e.key==="ArrowRight"&&dx===0){dx=20;dy=0;}
-    };
-    function loop(time){
-        if(!gameActive) return;
-        animationId=requestAnimationFrame(loop);
-        if(time-lastUpdate<100) return;
-        lastUpdate=time;
-        // Joystick
-        if(touchDir==="up"&&dy===0){dx=0;dy=-20;}
-        if(touchDir==="down"&&dy===0){dx=0;dy=20;}
-        if(touchDir==="left"&&dx===0){dx=-20;dy=0;}
-        if(touchDir==="right"&&dx===0){dx=20;dy=0;}
-        const head={x:snake[0].x+dx,y:snake[0].y+dy};
-        if(head.x<0||head.x>=400||head.y<0||head.y>=300||snake.some(s=>s.x===head.x&&s.y===head.y)){
-            gameOver(globalScore); return;
-        }
-        snake.unshift(head);
-        if(head.x === food.x && head.y === food.y){
-    globalScore += 10;
-    // Genera comida alineada a la grilla de 20 dentro de los 400x300 del canvas
-    food = {
-        x: Math.floor(Math.random() * 20) * 20, 
-        y: Math.floor(Math.random() * 15) * 20
-    };
-} else {
-    snake.pop();
-}
-
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle="#f0f"; ctx.fillRect(food.x,food.y,18,18);
-        ctx.fillStyle="#0ff"; snake.forEach(s=>ctx.fillRect(s.x,s.y,18,18));
+function startSnake() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Ajustes iniciales
+    let snake = [{ x: 200, y: 140 }, { x: 180, y: 140 }];
+    let dx = 20, dy = 0;
+    let lastUpdate = 0;
+    
+    // Generador de comida alineado a la grilla (400/20=20 columnas, 300/20=15 filas)
+    function generateFood() {
+        return {
+            x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+            y: Math.floor(Math.random() * (canvas.height / 20)) * 20
+        };
     }
-    loop(0);
-}
+    
+    let food = generateFood();
 
+    document.onkeydown = (e) => {
+        if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
+        if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
+        if (e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
+        if (e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
+    };
+
+    function loop(time) {
+        if (!gameActive) return;
+        
+        animationId = requestAnimationFrame(loop);
+
+        // Control de velocidad (FPS): solo actualiza cada 100ms
+        if (time - lastUpdate < 100) return;
+        lastUpdate = time;
+
+        // Soporte para Joystick
+        if (touchDir === "up" && dy === 0) { dx = 0; dy = -20; }
+        if (touchDir === "down" && dy === 0) { dx = 0; dy = 20; }
+        if (touchDir === "left" && dx === 0) { dx = -20; dy = 0; }
+        if (touchDir === "right" && dx === 0) { dx = 20; dy = 0; }
+
+        const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+        // COLISIONES: Paredes o Cuerpo
+        if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || 
+            snake.some(s => s.x === head.x && s.y === head.y)) {
+            gameOver(globalScore);
+            return;
+        }
+
+        snake.unshift(head);
+
+        // ¿Comió?
+        if (head.x === food.x && head.y === food.y) {
+            globalScore += 10;
+            food = generateFood();
+            // Evitar que la comida aparezca dentro del cuerpo de la serpiente
+            while (snake.some(s => s.x === food.x && s.y === food.y)) {
+                food = generateFood();
+            }
+        } else {
+            snake.pop();
+        }
+
+        // Renderizado
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Comida (Rosa Neón)
+        ctx.fillStyle = "#ff00ff"; 
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#ff00ff";
+        ctx.fillRect(food.x + 2, food.y + 2, 16, 16);
+        
+        // Serpiente (Cian Neón)
+        ctx.fillStyle = "#00ffff";
+        ctx.shadowColor = "#00ffff";
+        snake.forEach((s, index) => {
+            // La cabeza brilla un poco más
+            ctx.shadowBlur = index === 0 ? 15 : 5;
+            ctx.fillRect(s.x + 1, s.y + 1, 18, 18);
+        });
+        ctx.shadowBlur = 0; // Limpiar brillo para el siguiente frame
+    }
+    
+    animationId = requestAnimationFrame(loop);
+}
 // 7.2 Pac-Man con fantasmas
 function startPacMan(){
     const canvas=document.getElementById('gameCanvas');
