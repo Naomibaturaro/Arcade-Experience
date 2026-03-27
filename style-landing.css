@@ -29,10 +29,10 @@ body{
 }
 
 body::before{
+  pointer-events:none;
   content:"";
   position:fixed;
   inset:0;
-  pointer-events:none;
 
   background:
     linear-gradient(rgba(245,239,230,0.6), rgba(245,239,230,0.6)),
@@ -41,7 +41,7 @@ body::before{
   background-size:cover;
   background-position:center;
 
-  z-index:0;
+  z-index:-1;
 }
 
 /* ===== LOADER & ROBOT 3D ===== */
