@@ -202,8 +202,36 @@ document.getElementById('contact-form')?.addEventListener('submit', function(e) 
     })
     .catch(error => alert("Error al enviar: Asegúrate de haber confirmado tu mail en FormSubmit"));
 });
+// ==================== 7. FORMS =====================
+// Manejo del formulario por AJAX
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita que se recargue la página o salte a otra
+            
+            const formData = new FormData(this);
+            const successOverlay = document.getElementById('success-overlay');
 
-// ==================== 7. JUEGOS ====================
+            fetch(this.action, {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Aquí activamos tu gatito o robot de éxito
+                    if(successOverlay) successOverlay.style.display = 'flex';
+                    form.reset();
+                } else {
+                    alert("Error en el servidor de envío.");
+                }
+            })
+            .catch(error => alert("Error de conexión: " + error));
+        });
+    }
+});
+// ==================== 8. JUEGOS ====================
 
 function startSnake() {
     const canvas = document.getElementById('gameCanvas');
@@ -291,7 +319,7 @@ function startSnake() {
     
     animationId = requestAnimationFrame(loop);
 }
-// 7.2 Pac-Man con fantasmas
+// 8.2 Pac-Man con fantasmas
 function startPacMan(){
     const canvas=document.getElementById('gameCanvas');
     const ctx=canvas.getContext('2d');
@@ -352,7 +380,7 @@ function startPacMan(){
     loop();
 }
 
-// 7.3 Breakout con bloques
+// 8.3 Breakout con bloques
 function startBreakout(){
     const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
     let paddleX=160, ballX=200, ballY=250, ballDX=4, ballDY=-4, score=0;
@@ -387,41 +415,83 @@ function startBreakout(){
     }
     loop();
 }
-// 7.4 Dodge
+// 8.4 Dodge
 function startDodge() {
-    const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-    let px = 180, obs = [], keys = {}, speedMultiplier = 1;
-    document.onkeydown = (e) => keys[e.key] = true;
-    document.onkeyup = (e) => keys[e.key] = false;
-    canvas.onmousemove = canvas.ontouchmove = (e) => px = getInputX(e, canvas) - 10;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let px = 180; 
+    let obstacles = []; // Array que guardará los obstáculos actuales
+    let speedMultiplier = 1;
+
+    // 1. Limpiamos cualquier intervalo de generación previo
+    if(window.gameInterval) clearInterval(window.gameInterval);
+
+    // 2. Generador de obstáculos (aparecen cada 450ms)
     window.gameInterval = setInterval(() => {
         if(!gameActive) return;
         let type = Math.random() > 0.8 ? 'GLITCH' : 'DATA'; 
-        obs.push({ x: Math.random() * 370, y: -30, w: 25, h: 25, type: type, speed: (3 + Math.random() * 3) * speedMultiplier });
+        obstacles.push({ 
+            x: Math.random() * (canvas.width - 25), 
+            y: -30, 
+            w: 25, 
+            h: 25, 
+            type: type, 
+            speed: (3 + Math.random() * 3) * speedMultiplier 
+        });
     }, 450);
+
     function loop() {
         if (!gameActive) return;
-        if (keys["ArrowLeft"]) px -= 7; if (keys["ArrowRight"]) px += 7;
-        if (px < 0) px = 0; if (px > 380) px = 380;
-        ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; ctx.fillRect(0, 0, 400, 300);
-        ctx.fillStyle = "#0ff"; ctx.beginPath(); ctx.moveTo(px+10, 270); ctx.lineTo(px, 290); ctx.lineTo(px+20, 290); ctx.fill();
-        obs.forEach((o, i) => {
+
+        // Movimiento (Joystick + Teclado)
+        if (touchDir === "left") px -= 7;
+        if (touchDir === "right") px += 7;
+
+        // Limites laterales
+        if (px < 0) px = 0;
+        if (px > canvas.width - 20) px = canvas.width - 20;
+
+        // Fondo con rastro (estela)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar Jugador
+        ctx.fillStyle = "#0ff";
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#0ff";
+        ctx.beginPath();
+        ctx.moveTo(px + 10, 270);
+        ctx.lineTo(px, 290);
+        ctx.lineTo(px + 20, 290);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Procesar Obstáculos
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let o = obstacles[i];
             o.y += o.speed;
-            ctx.fillStyle = o.type === 'GLITCH' ? "#ff00ff" : "#fff";
+            
+            ctx.fillStyle = o.type === 'GLITCH' ? "#f0f" : "#fff";
             ctx.fillRect(o.x, o.y, o.w, o.h);
-            if (o.y > 260 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) gameOver(globalScore);
-            if (o.y > 300) { obs.splice(i, 1); globalScore++; }
-        });
+
+            // COLISIÓN DETECTADA
+            if (o.y > 260 && o.y < 290 && o.x < px + 20 && o.x + o.w > px) {
+                obstacles = []; // VACIAMOS los obstáculos para que no te maten al reaparecer
+                gameOver(globalScore); // Llama a la función global que resta vida
+                return; // Cortamos el loop actual
+            }
+
+            // Si sale de la pantalla, sumamos punto y borramos
+            if (o.y > canvas.height) {
+                obstacles.splice(i, 1);
+                globalScore++;
+            }
+        }
+
         animationId = requestAnimationFrame(loop);
     }
-    animationId = requestAnimationFrame(loop);
-}
-
-// final de todo 
-function getInputX(e, canvas) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) * (canvas.width / rect.width);
+    loop();
 }
 // Restart
 function restartCurrentGame() {
