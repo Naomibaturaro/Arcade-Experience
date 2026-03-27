@@ -66,39 +66,38 @@
             <p>Esquiva a los intrusos</p>
         </div>
     </section>
-
-   <div id="gameWindow" class="window">
-    <div class="window-header">
-        <span id="gameTitle">SISTEMA LISTO</span>
-        <button class="close-btn" onclick="closeGameWindow()">[X]</button>
-    </div>
-
-    <div id="lives-container">
-        <span class="life-icon">❤️</span>
-        <span class="life-icon">❤️</span>
-        <span class="life-icon">❤️</span>
-    </div>
-
-    <div class="canvas-container" style="position: relative;">
-        <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10;" onclick="initGame()">INICIAR</button>
+<div id="gameWindow">
+    <div class="window-content">
+        <h2 id="gameTitle">MÓDULO</h2>
         
-        <div id="overlay">
-            <div class="gameover-box">
-                <h2>MISIÓN FALLIDA</h2>
-                <p id="finalScore">PUNTAJE: 0</p>
-                <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
+        <div style="position: relative;"> 
+            <canvas id="gameCanvas" width="400" height="300"></canvas>
+            
+            <div id="overlay">
+                <button id="startBtn" class="btn-neon" onclick="initGame()">INICIAR</button>
+                <div class="gameover-box" style="display:none;">
+                    <h1 id="finalScore">PUNTAJE: 0</h1>
+                    <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
+                </div>
+            </div>
+
+            <div id="lives-container">
+                <span class="life-icon">❤️</span>
+                <span class="life-icon">❤️</span>
+                <span class="life-icon">❤️</span>
             </div>
         </div>
 
-        <canvas id="gameCanvas" width="400" height="300"></canvas>
-    </div>
-</div>         
-            <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:5;" onclick="initGame()">INICIAR</button>
-            
-            <canvas id="gameCanvas" width="400" height="300"></canvas>
+        <div class="mobile-only">
+            <div id="joystick-base">
+                <div id="joystick-stick"></div>
+            </div>
+            <button class="btn-round" onclick="/* acción extra si necesitas */">A</button>
         </div>
-    </div>
 
+        <button onclick="closeGameWindow()" class="btn-neon" style="margin-top:10px;">CERRAR</button>
+    </div>
+</div>
     <section id="contact" class="section-report">
     <div class="form-container">
         <h2>REPORTE DE SISTEMA</h2>
