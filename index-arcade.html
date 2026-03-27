@@ -67,7 +67,7 @@
         </div>
     </section>
 
-    <div id="gameWindow" class="window">
+   <div id="gameWindow" class="window">
     <div class="window-header">
         <span id="gameTitle">SISTEMA LISTO</span>
         <button class="close-btn" onclick="closeGameWindow()">[X]</button>
@@ -78,18 +78,21 @@
         <span class="life-icon">❤️</span>
         <span class="life-icon">❤️</span>
     </div>
-        <div class="canvas-container">
+
+    <div class="canvas-container" style="position: relative;">
+        <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10;" onclick="initGame()">INICIAR</button>
+        
+        <div id="overlay">
+            <div class="gameover-box">
+                <h2>MISIÓN FALLIDA</h2>
+                <p id="finalScore">PUNTAJE: 0</p>
+                <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
+            </div>
+        </div>
+
         <canvas id="gameCanvas" width="400" height="300"></canvas>
     </div>
-</div>  
-        <div class="canvas-container">
-            <div id="overlay">
-    <div class="gameover-box">
-        <h2>MISIÓN FALLIDA</h2>
-        <p id="finalScore">PUNTAJE: 0</p>
-        <button class="btn-neon" onclick="restartCurrentGame()">REINTENTAR</button>
-    </div>
-</div>          
+</div>         
             <button id="startBtn" class="btn-neon" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:5;" onclick="initGame()">INICIAR</button>
             
             <canvas id="gameCanvas" width="400" height="300"></canvas>
