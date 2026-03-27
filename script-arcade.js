@@ -80,9 +80,9 @@ if(joystickBase){
         const deltaY = touch.clientY-centerY;
         const dist = Math.min(40,Math.sqrt(deltaX**2+deltaY**2));
         const angle = Math.atan2(deltaY,deltaX);
-        joystickStick.style.transform = `translate(calc(-50%+${Math.cos(angle)*dist}px), calc(-50%+${Math.sin(angle)*dist}px))`;
-        if(Math.abs(deltaX)>Math.abs(deltaY)) touchDir=deltaX>0?"right":"left";
-        else touchDir=deltaY>0?"down":"up";
+        joystickStick.style.transform = `translate(calc(-50%+${Math.cos(angle)*dist}px), calc(-50%+${Math.sin(angle)*dist}px))`; 
+        if(Math.abs(deltaX) > Math.abs(deltaY)) touchDir = deltaX > 0 ? "right" : "left";
+        else touchDir = deltaY > 0 ? "up" : "down";
     },{passive:false});
     joystickBase.addEventListener('touchend',()=>{
         joystickStick.style.transform = `translate(-50%,-50%)`;
@@ -328,7 +328,7 @@ function startPacMan(){
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
     const offsetY=100;
-    let px=20,py=120,score=0,dir={x:0,y:0},speed=3;
+    let px=20,py=120,score=0,dir={x:0,y:0},speed=2;
     let ghosts=[
         {x:340,y:120,dx:-2,dy:0,color:"red"},
         {x:340,y:180,dx:0,dy:-2,color:"pink"},
@@ -405,8 +405,8 @@ function startBreakout() {
         if(!gameActive) return;
 
         // --- LÓGICA DE MOVIMIENTO JOYSTICK ---
-        if (touchDir === "left") paddleX -= 8;
-        if (touchDir === "right") paddleX += 8;
+        if (touchDir === "left") paddleX -= 5;
+        if (touchDir === "right") paddleX += 5;
 
         // Límites de la barra
         if (paddleX < 0) paddleX = 0;
@@ -497,8 +497,8 @@ function startDodge() {
         if (!gameActive) return;
 
         // Movimiento (Joystick + Teclado)
-        if (touchDir === "left") px -= 9;
-        if (touchDir === "right") px += 9;
+        if (touchDir === "left") px -= 7;
+        if (touchDir === "right") px += 7;
 
         // Limites laterales
         if (px < 0) px = 0;
