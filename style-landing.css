@@ -107,18 +107,18 @@ nav a{
 
 /* ===== HERO ===== */
 .hero{
-  min-height:55vh;
+  min-height:40vh;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   text-align:center;
-  padding: 100px 20px 60px;
+  padding: 70px 20px 30px;
   background: transparent;
 }
 
 .hero h1{
-  font-size:2.5rem;
+  font-size:2rem;
   font-weight:900;
   color:var(--primary);
   margin-bottom:15px;
@@ -133,7 +133,7 @@ nav a{
 
 /* ===== SECCIONES & CARDS ===== */
 .section{
-  padding:60px 20px;
+  padding:40px 20px;
   text-align:center;
 }
 
