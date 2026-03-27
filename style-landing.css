@@ -29,19 +29,17 @@ body{
 
 body::before{
   content:"";
-  position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  position:fixed;
+  inset:0;
 
-  background-image: url("images/arcade-bg.png"); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    linear-gradient(rgba(245,239,230,0.85), rgba(245,239,230,0.85)),
+    url("images/arcade-bg.png");
 
-  opacity: 0.12;
-  z-index: -1;
+  background-size:cover;
+  background-position:center;
+
+  z-index:-1;
 }
 
 /* ===== LOADER & ROBOT 3D ===== */
