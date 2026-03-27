@@ -99,7 +99,6 @@ if(joystickBase){
     });
 }
 
-// ==================== 6. CONTROL DE VENTANAS ====================
 // ==================== 6. CONTROL DE VENTANAS (CORREGIDO) ====================
 function openWindow(game){
     stopGame();
