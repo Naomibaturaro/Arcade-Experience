@@ -377,37 +377,93 @@ function startPacMan(){
 }
 
 // 8.3 Breakout con bloques
-function startBreakout(){
-    const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
-    let paddleX=160, ballX=200, ballY=250, ballDX=4, ballDY=-4, score=0;
-    const rows=4,cols=6,bricks=[];
-    for(let c=0;c<cols;c++){ bricks[c]=[]; for(let r=0;r<rows;r++) bricks[c][r]={status:1}; }
+function startBreakout() {
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    let paddleWidth = 80;
+    let paddleX = (canvas.width - paddleWidth) / 2;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height - 30;
+    let ballDX = 4;
+    let ballDY = -4;
+    
+    const rows = 4, cols = 6;
+    const bricks = [];
+    for(let c = 0; c < cols; c++) {
+        bricks[c] = [];
+        for(let r = 0; r < rows; r++) bricks[c][r] = { x: 0, y: 0, status: 1 };
+    }
 
-    document.onkeydown=e=>{ if(e.key==="ArrowLeft") paddleX-=7; if(e.key==="ArrowRight") paddleX+=7; };
+    // Eventos de teclado
+    document.onkeydown = e => {
+        if(e.key === "ArrowLeft") paddleX -= 25;
+        if(e.key === "ArrowRight") paddleX += 25;
+    };
 
-    function loop(){
+    function loop() {
         if(!gameActive) return;
-        ctx.fillStyle="#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle="#0ff"; ctx.fillRect(paddleX,280,80,10);
-        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(ballX,ballY,6,0,7); ctx.fill();
 
-        ballX+=ballDX; ballY+=ballDY;
-        if(ballX<=0||ballX>=canvas.width-6) ballDX*=-1;
-        if(ballY<=0) ballDY*=-1;
-        if(ballY>=280&&ballX>paddleX&&ballX<paddleX+80) ballDY=-Math.abs(ballDY);
-        if(ballY>canvas.height){ gameOver(globalScore); return; }
+        // --- LÓGICA DE MOVIMIENTO JOYSTICK ---
+        if (touchDir === "left") paddleX -= 8;
+        if (touchDir === "right") paddleX += 8;
 
-        for(let c=0;c<cols;c++){
-            for(let r=0;r<rows;r++){
-                const b=bricks[c][r];
-                if(b.status>0){
-                    let rx=c*65+10,ry=r*25+40;
-                    ctx.fillStyle="#f0f"; ctx.fillRect(rx,ry,60,18);
-                    if(ballX>rx&&ballX<rx+60&&ballY>ry&&ballY<ry+18){ ballDY*=-1; b.status--; globalScore+=10;}
+        // Límites de la barra
+        if (paddleX < 0) paddleX = 0;
+        if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dibujar Barra (Cian Neón)
+        ctx.fillStyle = "#0ff";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#0ff";
+        ctx.fillRect(paddleX, canvas.height - 20, paddleWidth, 10);
+
+        // Dibujar Pelota
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Rebotes de la pelota
+        if(ballX + ballDX > canvas.width - 6 || ballX + ballDX < 6) ballDX = -ballDX;
+        if(ballY + ballDY < 6) ballDY = -ballDY;
+        else if(ballY + ballDY > canvas.height - 20) {
+            if(ballX > paddleX && ballX < paddleX + paddleWidth) {
+                ballDY = -Math.abs(ballDY); // Rebote hacia arriba
+            } else {
+                gameOver(globalScore);
+                return;
+            }
+        }
+
+        ballX += ballDX;
+        ballY += ballDY;
+
+        // Lógica de Ladrillos
+        for(let c = 0; c < cols; c++) {
+            for(let r = 0; r < rows; r++) {
+                const b = bricks[c][r];
+                if(b.status === 1) {
+                    let brickX = (c * 65) + 10;
+                    let brickY = (r * 25) + 40;
+                    b.x = brickX;
+                    b.y = brickY;
+                    
+                    ctx.fillStyle = "#f0f"; // Rosa Neón
+                    ctx.fillRect(brickX, brickY, 60, 18);
+
+                    if(ballX > brickX && ballX < brickX + 60 && ballY > brickY && ballY < brickY + 18) {
+                        ballDY = -ballDY;
+                        b.status = 0;
+                        globalScore += 10;
+                    }
                 }
             }
         }
-        animationId=requestAnimationFrame(loop);
+        animationId = requestAnimationFrame(loop);
     }
     loop();
 }
