@@ -25,21 +25,23 @@ body{
   overflow-x:hidden;
   transition:0.4s;
   position: relative;
+  z-index:1; 
 }
 
 body::before{
   content:"";
   position:fixed;
   inset:0;
+  pointer-events:none;
 
   background:
-    linear-gradient(rgba(245,239,230,0.85), rgba(245,239,230,0.85)),
-    url("images/arcade-bg.png");
+    linear-gradient(rgba(245,239,230,0.6), rgba(245,239,230,0.6)),
+    url("img/arcade-bg.png");
 
   background-size:cover;
   background-position:center;
 
-  z-index:-1;
+  z-index:0;
 }
 
 /* ===== LOADER & ROBOT 3D ===== */
