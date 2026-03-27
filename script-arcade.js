@@ -131,7 +131,7 @@ function openWindow(game){
     if(mobileControls && window.innerWidth < 900) {
         mobileControls.style.display = 'flex';
 }
-
+        }
 function initGame(){
     document.getElementById("startBtn").style.display="none";
     document.getElementById("overlay").style.display="none";
