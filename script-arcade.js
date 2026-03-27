@@ -1,32 +1,23 @@
-// ==================== 1. INICIO SESIÓN ====================
-window.addEventListener("load", () => {
-    const sessionActive = sessionStorage.getItem('sessionActive');
-    const denied = document.getElementById('denied-overlay');
+// ==================== 1. LOADER ====================
+function dismissLoader() {
     const loader = document.getElementById("loader");
-
-    if (!sessionActive) {
-        document.body.classList.add("no-session");
-        if(denied) denied.style.display = 'flex';
-    } else {
-        if(denied) denied.remove();
-        document.body.classList.remove("no-session");
-
-        const user = sessionStorage.getItem('arcadeUser') || "JUGADOR";
-        const welcomeTitle = document.getElementById('welcome-user');
-        if(welcomeTitle) welcomeTitle.innerText = `HOLA, ${user.toUpperCase()}`;
-    }
-
-    // LOGICA DEL LOADER (Corregida)
-    if(loader){
+    if (loader) {
+        loader.classList.add("hidden");
         setTimeout(() => {
-            loader.classList.add("hidden");
-            setTimeout(() => {
-                loader.style.display = "none";
-            }, 500); 
-        }, 1500);
+            loader.style.display = "none";
+        }, 600);
     }
+}
+
+// Intentar cerrar apenas el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(dismissLoader, 1500);
 });
 
+// Por si las dudas (Failsafe rápido)
+window.onload = () => {
+    setTimeout(dismissLoader, 500);
+};
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
