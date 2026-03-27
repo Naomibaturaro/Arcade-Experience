@@ -19,10 +19,10 @@ window.addEventListener("load", () => {
     // LOGICA DEL LOADER (Corregida)
     if(loader){
         setTimeout(() => {
-            loader.style.opacity = "0";
+            loader.classList.add("hidden");
             setTimeout(() => {
                 loader.style.display = "none";
-            }, 500); // <-- Faltaba cerrar bien esta función
+            }, 500); 
         }, 1500);
     }
 });
