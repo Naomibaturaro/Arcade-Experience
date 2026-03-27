@@ -66,6 +66,7 @@ function preventScroll(e){
 }
 
 // ==================== 5. JOYSTICK ====================
+// ==================== 5. JOYSTICK (CON FILTRO DE SENSIBILIDAD) ====================
 const joystickBase = document.getElementById('joystick-base');
 const joystickStick = document.getElementById('joystick-stick');
 
@@ -74,19 +75,29 @@ if(joystickBase){
         e.preventDefault();
         const touch = e.touches[0];
         const rect = joystickBase.getBoundingClientRect();
-        const centerX = rect.left+rect.width/2;
-        const centerY = rect.top+rect.height/2;
-        const deltaX = touch.clientX-centerX;
-        const deltaY = touch.clientY-centerY;
-        const dist = Math.min(40,Math.sqrt(deltaX**2+deltaY**2));
-        const angle = Math.atan2(deltaY,deltaX);
-        joystickStick.style.transform = `translate(calc(-50%+${Math.cos(angle)*dist}px), calc(-50%+${Math.sin(angle)*dist}px))`; 
-        if(Math.abs(deltaX) > Math.abs(deltaY)) touchDir = deltaX > 0 ? "right" : "left";
-        else touchDir = deltaY > 0 ? "up" : "down";
-    },{passive:false});
-    joystickBase.addEventListener('touchend',()=>{
-        joystickStick.style.transform = `translate(-50%,-50%)`;
-        touchDir=null;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = touch.clientX - centerX;
+        const deltaY = touch.clientY - centerY;
+        
+        const dist = Math.min(40, Math.sqrt(deltaX**2 + deltaY**2));
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        joystickStick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`; 
+
+        // Solo activamos la dirección si el movimiento supera los 10px (Zona Muerta)
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+            if(Math.abs(deltaX) > Math.abs(deltaY)) {
+                touchDir = deltaX > 0 ? "right" : "left";
+            } else {
+                touchDir = deltaY > 0 ? "up" : "down";
+            }
+        }
+    }, {passive:false});
+
+    joystickBase.addEventListener('touchend', () => {
+        joystickStick.style.transform = `translate(-50%, -50%)`;
+        touchDir = null;
     });
 }
 
