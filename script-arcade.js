@@ -140,7 +140,10 @@ function initGame(){
     document.getElementById("overlay").style.display="none";
     gameActive=true;
     globalScore=0;
-
+    
+// --- RESETEAR VIDAS VISUALES AL INICIAR ---
+    const lifeIcons = document.querySelectorAll('.life-icon');
+    lifeIcons.forEach(icon => icon.classList.remove('lost'));
     if(currentGame==='snake') startSnake();
     else if(currentGame==='pacman') startPacMan();
     else if(currentGame==='breakout') startBreakout();
@@ -154,26 +157,33 @@ function stopGame(){
 }
 
 function gameOver(score) {
-    // 1. Detenemos cualquier proceso anterior INMEDIATAMENTE
-    stopGame(); 
+    stopGame(); // Detenemos el juego
 
-    lives--;
-    
+    lives--; // Restamos una vida
+
+    // --- ACTUALIZAR VIDAS VISUALES ---
+    const lifeIcons = document.querySelectorAll('.life-icon');
+    // "Apagamos" el corazón correspondiente (el índice es lives porque restamos antes)
+    if (lifeIcons[lives]) {
+        lifeIcons[lives].classList.add('lost');
+    }
+
     if (lives > 0) {
-        // Pequeña pausa para que el jugador respire antes de reaparecer
+        // Reinicia juego automáticamente con vidas restantes tras una pausa
         setTimeout(() => {
             if (currentGame) initGame();
-        }, 500);
+        }, 1000); // 1 segundo de pausa para que el jugador asimile la pérdida
         return;
     }
 
-    // Si no hay vidas, mostramos el overlay de Misión Fallida
+    // SI NO QUEDAN VIDAS (GAME OVER DEFINITIVO)
     gameActive = false;
     const fScore = document.getElementById("finalScore");
     const overlay = document.getElementById("overlay");
     if (fScore) fScore.innerText = "PUNTAJE: " + score;
     if (overlay) overlay.style.display = "flex";
 }
+
 function closeGameWindow(){
     const win=document.getElementById("gameWindow");
     if(win){
