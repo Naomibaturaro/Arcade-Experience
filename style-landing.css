@@ -219,7 +219,7 @@ input,textarea{
 
   nav{ padding: 10px; }
   nav div:first-child { font-size: 0.8rem; }
-  nav a { margin-left: 8px; font-size: 0.6rem; }
+  nav a { margin-left: 8px; font-size: 0.8rem; }
   .cards { grid-template-columns: 1fr; }
   .robot-img { width: 120px; }
 }
