@@ -385,49 +385,54 @@ function startPacMan(){
 function startBreakout() {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    
+    // --- NUEVO: INICIALIZACIÓN DE VARIABLES ---
     let paddleWidth = 80;
     let paddleX = (canvas.width - paddleWidth) / 2;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height - 30;
+    let ballDX = 3; // Velocidad X
+    let ballDY = -3; // Velocidad Y
+    
+    // Configuración de ladrillos
+    const rows = 3;
+    const cols = 5;
+    let bricks = [];
+    for(let c = 0; c < cols; c++) {
+        bricks[c] = [];
+        for(let r = 0; r < rows; r++) {
+            bricks[c][r] = { x: 0, y: 0, status: 1 };
+        }
+    }
 
-    // --- CONTROL TÁCTIL DIRECTO ---
-    canvas.addEventListener('touchmove', (e) => {
-        if (!gameActive) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const touchX = touch.clientX - rect.left;
-        
-        // La barra se centra donde está tu dedo
-        paddleX = touchX - (paddleWidth / 2);
-        
-        // Límites para que no se salga
-        if (paddleX < 0) paddleX = 0;
-        if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
-    }, { passive: false });
-
-
-    // Eventos de teclado
+    // --- CONTROLES (Flechas y Táctil) ---
     document.onkeydown = e => {
         if(e.key === "ArrowLeft") paddleX -= 25;
         if(e.key === "ArrowRight") paddleX += 25;
     };
 
+    canvas.addEventListener('touchmove', (e) => {
+        if (!gameActive) return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const touchX = e.touches[0].clientX - rect.left;
+        paddleX = touchX - (paddleWidth / 2);
+    }, { passive: false });
+
     function loop() {
         if(!gameActive) return;
 
-        // --- LÓGICA DE MOVIMIENTO JOYSTICK ---
-        if (touchDir === "left") paddleX -= 5;
-        if (touchDir === "right") paddleX += 5;
+        // Joystick
+        if (touchDir === "left") paddleX -= 7;
+        if (touchDir === "right") paddleX += 7;
 
-        // Límites de la barra
         if (paddleX < 0) paddleX = 0;
         if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Dibujar Barra (Cian Neón)
+        // Dibujar Barra
         ctx.fillStyle = "#0ff";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#0ff";
         ctx.fillRect(paddleX, canvas.height - 20, paddleWidth, 10);
 
         // Dibujar Pelota
@@ -435,14 +440,13 @@ function startBreakout() {
         ctx.beginPath();
         ctx.arc(ballX, ballY, 6, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Rebotes de la pelota
+        // Rebotes
         if(ballX + ballDX > canvas.width - 6 || ballX + ballDX < 6) ballDX = -ballDX;
         if(ballY + ballDY < 6) ballDY = -ballDY;
         else if(ballY + ballDY > canvas.height - 20) {
             if(ballX > paddleX && ballX < paddleX + paddleWidth) {
-                ballDY = -Math.abs(ballDY); // Rebote hacia arriba
+                ballDY = -Math.abs(ballDY);
             } else {
                 gameOver(globalScore);
                 return;
@@ -452,20 +456,19 @@ function startBreakout() {
         ballX += ballDX;
         ballY += ballDY;
 
-        // Lógica de Ladrillos
+        // Dibujar Ladrillos
         for(let c = 0; c < cols; c++) {
             for(let r = 0; r < rows; r++) {
                 const b = bricks[c][r];
                 if(b.status === 1) {
-                    let brickX = (c * 65) + 10;
+                    let brickX = (c * 75) + 15;
                     let brickY = (r * 25) + 40;
                     b.x = brickX;
                     b.y = brickY;
-                    
-                    ctx.fillStyle = "#f0f"; // Rosa Neón
-                    ctx.fillRect(brickX, brickY, 60, 18);
+                    ctx.fillStyle = "#f0f";
+                    ctx.fillRect(brickX, brickY, 65, 18);
 
-                    if(ballX > brickX && ballX < brickX + 60 && ballY > brickY && ballY < brickY + 18) {
+                    if(ballX > brickX && ballX < brickX + 65 && ballY > brickY && ballY < brickY + 18) {
                         ballDY = -ballDY;
                         b.status = 0;
                         globalScore += 10;
@@ -481,11 +484,13 @@ function startBreakout() {
 function startDodge() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    
     let px = 180; 
     let obstacles = []; // Array que guardará los obstáculos actuales
     let speedMultiplier = 1;
-
+document.onkeydown = (e) => {
+        if (e.key === "ArrowLeft") px -= 20;
+        if (e.key === "ArrowRight") px += 20;
+    };
     // 1. Limpiamos cualquier intervalo de generación previo
     if(window.gameInterval) clearInterval(window.gameInterval);
 
