@@ -201,46 +201,22 @@ document.getElementById('contact-form')?.addEventListener('submit', function(e) 
     const form = e.target;
     const successOverlay = document.getElementById('success-overlay');
 
-    fetch(form.action, {
-        method: "POST",
-        body: new FormData(form),
-    })
-    .then(response => response.ok ? response.json() : Promise.reject())
-    .then(() => {
+    fetch(this.action, {
+    method: "POST",
+    body: formData,
+    headers: { 'Accept': 'application/json' }
+})
+.then(response => {
+    if (response.ok) {
         if(successOverlay) successOverlay.style.display = 'flex';
-        form.reset();
-    })
+        this.reset(); // Usamos 'this' porque es el formulario
+    } else {
+        alert("Error en el servidor de envío.");
+    }
+})
     .catch(error => alert("Error al enviar: Asegúrate de haber confirmado tu mail en FormSubmit"));
 });
 // ==================== 7. FORMS =====================
-// Manejo del formulario por AJAX
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita que se recargue la página o salte a otra
-            
-            const formData = new FormData(this);
-            const successOverlay = document.getElementById('success-overlay');
-
-            fetch(this.action, {
-                method: "POST",
-                body: formData,
-                headers: { 'Accept': 'application/json' }
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Aquí activamos tu gatito o robot de éxito
-                    if(successOverlay) successOverlay.style.display = 'flex';
-                    form.reset();
-                } else {
-                    alert("Error en el servidor de envío.");
-                }
-            })
-            .catch(error => alert("Error de conexión: " + error));
-        });
-    }
-});
 // ==================== 8. JUEGOS ====================
 
 function startSnake() {
