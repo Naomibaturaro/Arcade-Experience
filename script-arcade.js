@@ -147,6 +147,7 @@ function initGame(){
     if(currentGame==='snake') startSnake();
     else if(currentGame==='pacman') startPacMan();
     else if(currentGame==='breakout') startBreakout();
+    else if(currentGame === 'dodge') startDodge();
 }
 
 function stopGame(){
@@ -200,6 +201,7 @@ document.getElementById('contact-form')?.addEventListener('submit', function(e) 
     e.preventDefault();
     const form = e.target;
     const successOverlay = document.getElementById('success-overlay');
+    const formData = new FormData(form);
 
     fetch(this.action, {
     method: "POST",
