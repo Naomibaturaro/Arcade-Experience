@@ -157,7 +157,6 @@ function initGame(){
     else if(currentGame==='pacman') startPacMan();
     else if(currentGame==='breakout') startBreakout();
     else if(currentGame === 'dodge') startDodge();
-}
 
 function stopGame(){
     gameActive=false;
