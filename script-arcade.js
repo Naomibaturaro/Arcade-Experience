@@ -100,17 +100,18 @@ if(joystickBase){
 }
 
 // ==================== 6. CONTROL DE VENTANAS ====================
+// ==================== 6. CONTROL DE VENTANAS (CORREGIDO) ====================
 function openWindow(game){
     stopGame();
-    currentGame=game;
-    touchDir=null;
-    lives=3;
-    globalScore=0;
+    currentGame = game;
+    touchDir = null;
+    lives = 3;
+    globalScore = 0;
 
-    const win=document.getElementById("gameWindow");
-    const title=document.getElementById("gameTitle");
-    const overlay=document.getElementById("overlay");
-    const btn=document.getElementById("startBtn");
+    const win = document.getElementById("gameWindow");
+    const title = document.getElementById("gameTitle");
+    const overlay = document.getElementById("overlay");
+    const btn = document.getElementById("startBtn");
 
     blockBackgroundInteraction(true);
 
@@ -118,27 +119,47 @@ function openWindow(game){
         win.classList.remove("closing");
         win.classList.add("active");
     }
-    if(title) title.innerText=`MÓDULO: ${game.toUpperCase()}`;
-    if(overlay) overlay.style.display="flex";
-    if(btn) btn.style.display="block";
-  
+    
+    if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
+    if(overlay) overlay.style.display = "flex";
+    if(btn) btn.style.display = "block";
 
-    const openSound=document.getElementById("openSound");
-    if(openSound){ openSound.currentTime=0; openSound.play().catch(()=>{}); }
-    if(navigator.vibrate) navigator.vibrate(40);
-
+    // Mostrar controles si es móvil
     const mobileControls = document.querySelector('.mobile-only');
     if(mobileControls && window.innerWidth < 900) {
         mobileControls.style.display = 'flex';
+    }
+
+    const openSound = document.getElementById("openSound");
+    if(openSound){ 
+        openSound.currentTime = 0; 
+        openSound.play().catch(()=>{}); 
+    }
+    if(navigator.vibrate) navigator.vibrate(40);
 }
-        }
+
 function initGame(){
-    document.getElementById("startBtn").style.display="none";
-    document.getElementById("overlay").style.display="none";
-    document.querySelector(".gameover-box").style.display = "none";
-    gameActive=true;
-    globalScore=0;
-}    
+    const startBtn = document.getElementById("startBtn");
+    const overlay = document.getElementById("overlay");
+    const gameOverBox = document.querySelector(".gameover-box");
+
+    if(startBtn) startBtn.style.display = "none";
+    if(overlay) overlay.style.display = "none";
+    if(gameOverBox) gameOverBox.style.display = "none";
+    
+    gameActive = true;
+    globalScore = 0;
+    
+    // Resetear corazones visuales
+    const lifeIcons = document.querySelectorAll('.life-icon');
+    lifeIcons.forEach(icon => icon.classList.remove('lost'));
+
+    // Lanzar juego
+    if(currentGame === 'snake') startSnake();
+    else if(currentGame === 'pacman') startPacMan();
+    else if(currentGame === 'breakout') startBreakout();
+    else if(currentGame === 'dodge') startDodge();
+}
 // --- RESETEAR VIDAS VISUALES AL INICIAR ---
     const lifeIcons = document.querySelectorAll('.life-icon');
     lifeIcons.forEach(icon => icon.classList.remove('lost'));
