@@ -113,9 +113,17 @@ nav div a:hover { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan)
 
 /* ----- BOTONES NEON ----- */
 .btn-neon { 
-    background: var(--neon-pink); color: #fff; border: none; padding: 12px 30px; 
-    font-family: 'Orbitron', sans-serif; cursor: pointer; box-shadow: 0 0 15px var(--neon-pink); 
-    transition: 0.3s; text-transform: uppercase; font-weight: bold; border-radius: 5px;
+    background: var(--neon-pink) !important; /* Forzamos el rosa */
+    color: #fff; 
+    border: none; 
+    padding: 12px 30px; 
+    font-family: 'Orbitron', sans-serif; 
+    cursor: pointer; 
+    box-shadow: 0 0 15px var(--neon-pink); 
+    transition: 0.3s; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+    border-radius: 5px;
     letter-spacing: 2px;
 }
 .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-pink); background: #ff33ff; }
