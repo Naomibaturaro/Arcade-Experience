@@ -27,14 +27,15 @@ window.addEventListener("load", () => {
     }
 });
 
-// FAILSAFE GLOBAL (Corregido el comparador !==)
+// FAILSAFE GLOBAL 
 setTimeout(() => {
     const loader = document.getElementById("loader");
-    if(loader && loader.style.display !== "none"){
-        loader.style.display = "none";
+    if (loader && loader.style.display !== "none") {
+        loader.classList.add("hidden");
+        setTimeout(() => loader.style.display = "none", 500);
+        console.warn("Failsafe: El loader se cerró por tiempo límite.");
     }
-}, 3000);
-
+}, 4000);
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
