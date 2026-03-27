@@ -127,10 +127,11 @@ function openWindow(game){
     const mobileControls = document.querySelector('.mobile-only');
     if(mobileControls && window.innerWidth < 900) {
         if (game === 'breakout') {
-        mobileControls.style.display = 'none';
-            } else {
-        mobileControls.style.display = 'flex';
-    }
+            mobileControls.style.display = 'none';
+        } else {
+            mobileControls.style.display = 'flex';
+        }
+    } 
 
     const openSound = document.getElementById("openSound");
     if(openSound){ 
@@ -138,7 +139,6 @@ function openWindow(game){
         openSound.play().catch(()=>{}); 
     }
     if(navigator.vibrate) navigator.vibrate(40);
-
 }
 
 function initGame(){
