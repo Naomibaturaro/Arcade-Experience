@@ -27,15 +27,6 @@ window.addEventListener("load", () => {
     }
 });
 
-// FAILSAFE GLOBAL 
-setTimeout(() => {
-    const loader = document.getElementById("loader");
-    if (loader && loader.style.display !== "none") {
-        loader.classList.add("hidden");
-        setTimeout(() => loader.style.display = "none", 500);
-        console.warn("Failsafe: El loader se cerró por tiempo límite.");
-    }
-}, 4000);
 // ==================== 2. VARIABLES GLOBALES ====================
 let currentGame = null, animationId = null, gameActive = false, globalScore = 0;
 let touchDir = null;
@@ -147,7 +138,7 @@ function initGame(){
     document.querySelector(".gameover-box").style.display = "none";
     gameActive=true;
     globalScore=0;
-    
+}    
 // --- RESETEAR VIDAS VISUALES AL INICIAR ---
     const lifeIcons = document.querySelectorAll('.life-icon');
     lifeIcons.forEach(icon => icon.classList.remove('lost'));
@@ -499,3 +490,15 @@ function restartCurrentGame() {
     
     initGame();
 }
+// NUEVO FAILSAFE
+setTimeout(() => {
+    const loader = document.getElementById("loader");
+    // Si el loader sigue visible después de 5 segundos, lo forzamos a desaparecer
+    if (loader && loader.style.display !== "none") {
+        loader.classList.add("hidden");
+        setTimeout(() => {
+            loader.style.display = "none";
+        }, 600);
+        console.log("Sistema: Loader removido por seguridad.");
+    }
+}, 5000);
