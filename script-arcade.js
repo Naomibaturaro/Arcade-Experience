@@ -65,7 +65,6 @@ function preventScroll(e){
     if(document.getElementById("gameWindow")?.classList.contains("active")) e.preventDefault();
 }
 
-// ==================== 5. JOYSTICK ====================
 // ==================== 5. JOYSTICK (CON FILTRO DE SENSIBILIDAD) ====================
 const joystickBase = document.getElementById('joystick-base');
 const joystickStick = document.getElementById('joystick-stick');
@@ -119,8 +118,7 @@ function openWindow(game){
     if(win){ 
         win.classList.remove("closing");
         win.classList.add("active");
-    }
-    
+    }  
     if(title) title.innerText = `MÓDULO: ${game.toUpperCase()}`;
     if(overlay) overlay.style.display = "flex";
     if(btn) btn.style.display = "block";
@@ -128,6 +126,9 @@ function openWindow(game){
     // Mostrar controles si es móvil
     const mobileControls = document.querySelector('.mobile-only');
     if(mobileControls && window.innerWidth < 900) {
+        if (game === 'breakout') {
+        mobileControls.style.display = 'none';
+            } else {
         mobileControls.style.display = 'flex';
     }
 
@@ -137,6 +138,7 @@ function openWindow(game){
         openSound.play().catch(()=>{}); 
     }
     if(navigator.vibrate) navigator.vibrate(40);
+
 }
 
 function initGame(){
@@ -161,13 +163,6 @@ function initGame(){
     else if(currentGame === 'breakout') startBreakout();
     else if(currentGame === 'dodge') startDodge();
 }
-// --- RESETEAR VIDAS VISUALES AL INICIAR ---
-    const lifeIcons = document.querySelectorAll('.life-icon');
-    lifeIcons.forEach(icon => icon.classList.remove('lost'));
-    if(currentGame==='snake') startSnake();
-    else if(currentGame==='pacman') startPacMan();
-    else if(currentGame==='breakout') startBreakout();
-    else if(currentGame === 'dodge') startDodge();
 
 function stopGame(){
     gameActive=false;
@@ -260,7 +255,7 @@ function startSnake() {
     let food = generateFood();
 
     document.onkeydown = (e) => {
-        if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
+       if (e.key === "ArrowUp" && dy === 0) { dx = 0; dy = -20; }
         if (e.key === "ArrowDown" && dy === 0) { dx = 0; dy = 20; }
         if (e.key === "ArrowLeft" && dx === 0) { dx = -20; dy = 0; }
         if (e.key === "ArrowRight" && dx === 0) { dx = 20; dy = 0; }
@@ -280,7 +275,6 @@ function startSnake() {
         if (touchDir === "down" && dy === 0) { dx = 0; dy = 20; }
         if (touchDir === "left" && dx === 0) { dx = -20; dy = 0; }
         if (touchDir === "right" && dx === 0) { dx = 20; dy = 0; }
-
         const head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
         // COLISIONES: Paredes o Cuerpo
@@ -346,7 +340,7 @@ function startPacMan(){
         {x:40,y:180,dx:2,dy:0,color:"cyan"}
     ];
 
-    document.onkeydown=(e)=>{
+   document.onkeydown=(e)=>{
         if(e.key==="ArrowLeft") dir={x:-speed,y:0};
         if(e.key==="ArrowRight") dir={x:speed,y:0};
         if(e.key==="ArrowUp") dir={x:0,y:-speed};
@@ -356,10 +350,10 @@ function startPacMan(){
     function loop(){
         if(!gameActive) return;
 
-        if(touchDir==="left") dir={x:-speed,y:0};
-        if(touchDir==="right") dir={x:speed,y:0};
         if(touchDir==="up") dir={x:0,y:-speed};
         if(touchDir==="down") dir={x:0,y:speed};
+        if(touchDir==="left") dir={x:-speed,y:0};
+        if(touchDir==="right") dir={x:speed,y:0};
 
         let nextX=px+dir.x,nextY=py+dir.y;
         let col=Math.floor((nextX+10)/grid),row=Math.floor((nextY-offsetY+10)/grid);
@@ -391,20 +385,25 @@ function startPacMan(){
 function startBreakout() {
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    
     let paddleWidth = 80;
     let paddleX = (canvas.width - paddleWidth) / 2;
-    let ballX = canvas.width / 2;
-    let ballY = canvas.height - 30;
-    let ballDX = 4;
-    let ballDY = -4;
-    
-    const rows = 4, cols = 6;
-    const bricks = [];
-    for(let c = 0; c < cols; c++) {
-        bricks[c] = [];
-        for(let r = 0; r < rows; r++) bricks[c][r] = { x: 0, y: 0, status: 1 };
-    }
+
+    // --- CONTROL TÁCTIL DIRECTO ---
+    canvas.addEventListener('touchmove', (e) => {
+        if (!gameActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const touchX = touch.clientX - rect.left;
+        
+        // La barra se centra donde está tu dedo
+        paddleX = touchX - (paddleWidth / 2);
+        
+        // Límites para que no se salga
+        if (paddleX < 0) paddleX = 0;
+        if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
+    }, { passive: false });
+
 
     // Eventos de teclado
     document.onkeydown = e => {
