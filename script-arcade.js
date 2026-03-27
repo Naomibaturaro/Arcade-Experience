@@ -431,8 +431,8 @@ function startDodge() {
         if (!gameActive) return;
 
         // Movimiento (Joystick + Teclado)
-        if (touchDir === "left") px -= 7;
-        if (touchDir === "right") px += 7;
+        if (touchDir === "left") px -= 9;
+        if (touchDir === "right") px += 9;
 
         // Limites laterales
         if (px < 0) px = 0;
