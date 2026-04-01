@@ -43,7 +43,7 @@ function showRobot(action) {
 
         if (pendingAction === 'arcade') {
             setTimeout(() => {
-                window.location.href = 'index-arcade.html';
+                window.open('index-arcade.html', '_blank');
             }, 1200);
         }
     } else {
@@ -68,7 +68,7 @@ function processLogin() {
 
         if (pendingAction === 'arcade') {
             setTimeout(() => {
-                window.location.href = 'index-arcade.html';
+                window.open('index-arcade.html', '_blank');
             }, 1500);
         }
     } else {
@@ -81,7 +81,7 @@ function processLogin() {
 function hideRobot() {
     robotModal.style.display = 'none';
     if (pendingAction === 'arcade') {
-        window.location.href = 'index-arcade.html';
+        window.open('index-arcade.html', '_blank');
     }
 }
 // CONTROL DE ENVÍO DE FORMULARIO SIN RECARGAR
